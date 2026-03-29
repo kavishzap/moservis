@@ -38,16 +38,22 @@ export function CTASection() {
     <section className="py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary/80">
-          <div className="grid items-center gap-8 p-8 md:grid-cols-2 md:gap-12 md:p-12 lg:p-16">
+          <div className="grid items-start gap-10 p-8 md:grid-cols-2 md:items-center md:gap-12 md:p-12 lg:p-16">
             {/* Left Content */}
-            <div className="text-center md:text-left">
-              <h2 className="mb-4 text-3xl font-bold text-primary-foreground md:text-4xl">
-                Are you a worker? Join ZotServis and get more clients.
+            <div className="flex flex-col items-center text-center md:items-start md:text-left">
+              <p className="mb-4 inline-flex w-fit items-center rounded-full border border-primary-foreground/25 bg-primary-foreground/10 px-4 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-primary-foreground/90">
+                Are you a worker?
+              </p>
+              <h2 className="mb-4 max-w-xl text-balance text-3xl font-bold leading-[1.2] tracking-tight text-primary-foreground md:text-4xl lg:text-[2.35rem]">
+                <span className="block">Join ZotServis</span>
+                <span className="mt-2 block text-2xl font-semibold leading-snug text-primary-foreground/95 md:text-3xl">
+                  and get more clients
+                </span>
               </h2>
-              <p className="mb-4 text-primary-foreground/80">
+              <p className="mb-4 max-w-xl text-pretty text-base leading-relaxed text-primary-foreground/85 md:text-lg">
                 Register your profile and start receiving job requests from customers across Mauritius.
               </p>
-              <div className="mb-8 rounded-2xl border border-primary-foreground/20 bg-primary-foreground/10 p-5 text-left">
+              <div className="mb-8 w-full max-w-xl rounded-2xl border border-primary-foreground/20 bg-primary-foreground/10 p-5 text-left">
                 <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-primary-foreground/90">
                   Pricing
                 </p>
@@ -73,14 +79,16 @@ export function CTASection() {
                   {WORKER_YEARLY_SAVINGS_PCT}% off).
                 </p>
               </div>
-              <Link href="/register">
-                <Button
-                  size="lg"
-                  className="bg-accent text-accent-foreground hover:bg-accent/90"
-                >
-                  Register as a Worker
-                </Button>
-              </Link>
+              <div className="w-full max-w-xl">
+                <Link href="/register" className="block w-full md:inline-block md:w-auto">
+                  <Button
+                    size="lg"
+                    className="w-full bg-accent text-accent-foreground hover:bg-accent/90 md:w-auto"
+                  >
+                    Register as a Worker
+                  </Button>
+                </Link>
+              </div>
             </div>
 
             {/* Right - Worker visual + benefits */}
