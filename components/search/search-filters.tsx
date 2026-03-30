@@ -3,8 +3,7 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react"
 import { Filter, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
+import { ServiceTypePills } from "@/components/service-type-pills"
 import {
   Select,
   SelectContent,
@@ -19,10 +18,15 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { MAURITIUS_DISTRICTS, SERVICE_TYPES } from "@/lib/search-options"
+import { MAURITIUS_DISTRICTS } from "@/lib/search-options"
+import { ALL_DISTRICTS } from "@/lib/search-url"
 import { cn } from "@/lib/utils"
 
+export { ALL_DISTRICTS } from "@/lib/search-url"
+
 type SearchFiltersContextValue = {
+  selectedDistrict: string
+  setSelectedDistrict: (value: string) => void
   selectedJobTypes: string[]
   toggleJobType: (value: string) => void
   clearFilters: () => void
@@ -30,7 +34,7 @@ type SearchFiltersContextValue = {
 
 const SearchFiltersContext = createContext<SearchFiltersContextValue | null>(null)
 
-function useSearchFiltersContext() {
+export function useSearchFilters() {
   const ctx = useContext(SearchFiltersContext)
   if (!ctx) {
     throw new Error("Search filters must be used within SearchFiltersProvider")
@@ -38,8 +42,17 @@ function useSearchFiltersContext() {
   return ctx
 }
 
-export function SearchFiltersProvider({ children }: { children: ReactNode }) {
-  const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>([])
+export function SearchFiltersProvider({
+  children,
+  initialDistrict = ALL_DISTRICTS,
+  initialJobTypes = [],
+}: {
+  children: ReactNode
+  initialDistrict?: string
+  initialJobTypes?: string[]
+}) {
+  const [selectedDistrict, setSelectedDistrict] = useState<string>(initialDistrict)
+  const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>(initialJobTypes)
 
   const toggleJobType = useCallback((value: string) => {
     setSelectedJobTypes((prev) =>
@@ -48,12 +61,19 @@ export function SearchFiltersProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const clearFilters = useCallback(() => {
+    setSelectedDistrict(ALL_DISTRICTS)
     setSelectedJobTypes([])
   }, [])
 
   const value = useMemo(
-    () => ({ selectedJobTypes, toggleJobType, clearFilters }),
-    [selectedJobTypes, toggleJobType, clearFilters]
+    () => ({
+      selectedDistrict,
+      setSelectedDistrict,
+      selectedJobTypes,
+      toggleJobType,
+      clearFilters,
+    }),
+    [selectedDistrict, selectedJobTypes, toggleJobType, clearFilters]
   )
 
   return (
@@ -62,14 +82,19 @@ export function SearchFiltersProvider({ children }: { children: ReactNode }) {
 }
 
 function LocationField({ className }: { className?: string }) {
+  const { selectedDistrict, setSelectedDistrict } = useSearchFilters()
+
   return (
     <div className={cn("min-w-0", className)}>
       <h3 className="mb-3 text-base font-semibold text-foreground">Location</h3>
-      <Select>
+      <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
         <SelectTrigger className="h-auto min-h-11 w-full min-w-0 whitespace-normal py-2.5 text-left text-sm [&>span]:line-clamp-3 [&>span]:text-left">
-          <SelectValue placeholder="Select district" />
+          <SelectValue placeholder="District" />
         </SelectTrigger>
         <SelectContent className="max-h-[min(60vh,24rem)] w-[var(--radix-select-trigger-width)] max-w-[calc(100vw-2rem)]">
+          <SelectItem value={ALL_DISTRICTS} className="text-sm">
+            All districts
+          </SelectItem>
           {MAURITIUS_DISTRICTS.map((d) => (
             <SelectItem key={d.value} value={d.value} className="whitespace-normal py-2.5 text-sm leading-snug">
               {d.label}
@@ -82,42 +107,33 @@ function LocationField({ className }: { className?: string }) {
 }
 
 function JobTypeField({ className }: { className?: string }) {
-  const { selectedJobTypes, toggleJobType } = useSearchFiltersContext()
+  const { selectedJobTypes, toggleJobType } = useSearchFilters()
 
   return (
     <div className={cn("min-w-0", className)}>
-      <h3 className="mb-3 text-base font-semibold text-foreground">Job type</h3>
-      <div className="space-y-2.5">
-        {SERVICE_TYPES.map(({ label, value }) => (
-          <div key={value} className="flex gap-3">
-            <Checkbox
-              id={value}
-              checked={selectedJobTypes.includes(value)}
-              onCheckedChange={() => toggleJobType(value)}
-              className="mt-0.5 shrink-0"
-            />
-            <Label
-              htmlFor={value}
-              className="min-w-0 flex-1 cursor-pointer text-sm leading-snug text-muted-foreground break-words"
-            >
-              {label}
-            </Label>
-          </div>
-        ))}
-      </div>
+      <h3 className="mb-2 text-base font-semibold text-foreground" id="filter-job-type-heading">
+        Job type
+      </h3>
+      <p className="mb-3 text-sm text-muted-foreground">Select one or more.</p>
+      <ServiceTypePills
+        selected={selectedJobTypes}
+        onToggle={toggleJobType}
+        labelId="filter-job-type-heading"
+      />
     </div>
   )
 }
 
 function FilterContent() {
-  const { selectedJobTypes, clearFilters } = useSearchFiltersContext()
+  const { selectedJobTypes, selectedDistrict, clearFilters } = useSearchFilters()
+  const hasFilters = selectedJobTypes.length > 0 || selectedDistrict !== ALL_DISTRICTS
 
   return (
     <div className="space-y-8">
       <LocationField />
       <JobTypeField />
 
-      {selectedJobTypes.length > 0 && (
+      {hasFilters && (
         <Button variant="outline" size="sm" onClick={clearFilters} className="w-full shrink-0">
           <X className="mr-2 h-4 w-4 shrink-0" />
           Clear filters

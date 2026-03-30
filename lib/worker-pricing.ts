@@ -1,6 +1,11 @@
 export const WORKER_MONTHLY_RS = 100
 export const WORKER_YEARLY_RS = 1000
 
+/** Matches DB `plan` column and form `name="plan"` */
+export type WorkerPlanId = "monthly_100" | "yearly_1000"
+
+export const DEFAULT_WORKER_PLAN: WorkerPlanId = "yearly_1000"
+
 const monthlyAnnualTotal = WORKER_MONTHLY_RS * 12
 
 export const WORKER_YEARLY_SAVINGS_RS = monthlyAnnualTotal - WORKER_YEARLY_RS

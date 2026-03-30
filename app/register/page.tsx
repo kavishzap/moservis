@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
+import { useEffect, useState, type FormEvent, type ReactNode } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {
   Select,
   SelectContent,
@@ -27,16 +28,25 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { MAURITIUS_DISTRICTS } from "@/lib/search-options"
-import { ServiceTypeSelect } from "@/components/service-type-select"
+import { ServiceTypePills } from "@/components/service-type-pills"
 import {
+  DEFAULT_WORKER_PLAN,
   WORKER_MONTHLY_RS,
   WORKER_YEARLY_RS,
   WORKER_YEARLY_SAVINGS_PCT,
   WORKER_YEARLY_SAVINGS_RS,
+  type WorkerPlanId,
 } from "@/lib/worker-pricing"
+import { cn } from "@/lib/utils"
 import { PHONE_INPUT_PLACEHOLDER } from "@/lib/contact"
 import { WORKER_PROMO_PNG } from "@/lib/promo-assets"
 import { CheckCircle2, Users, Phone, TrendingUp, Shield, X } from "lucide-react"
+import { toast, Toaster } from "sonner"
+import {
+  isUniqueViolation,
+  normalizeEmail,
+  submitWorkerApplication,
+} from "@/lib/worker-application"
 
 const benefits = [
   {
@@ -61,23 +71,159 @@ const benefits = [
   },
 ]
 
+function RegisterFormSection({
+  title,
+  description,
+  children,
+  className,
+  headingId,
+}: {
+  title: string
+  description?: string
+  children: ReactNode
+  className?: string
+  headingId?: string
+}) {
+  return (
+    <section
+      className={cn(
+        "rounded-xl border border-border/90 bg-muted/20 p-5 shadow-sm sm:p-6",
+        className
+      )}
+    >
+      <header className="mb-5 border-b border-border/70 pb-4">
+        <h2
+          id={headingId}
+          className="text-base font-semibold tracking-tight text-foreground"
+        >
+          {title}
+        </h2>
+        {description ? (
+          <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{description}</p>
+        ) : null}
+      </header>
+      <div className="space-y-5">{children}</div>
+    </section>
+  )
+}
+
 export default function RegisterPage() {
-  const [jobType, setJobType] = useState("")
+  const [jobTypes, setJobTypes] = useState<string[]>([])
+  const [jobTypeError, setJobTypeError] = useState(false)
   const [services, setServices] = useState<string[]>([])
   const [serviceInput, setServiceInput] = useState("")
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [district, setDistrict] = useState("")
+  const [workerKind, setWorkerKind] = useState<"individual" | "contractor">("individual")
+  const [plan, setPlan] = useState<WorkerPlanId>(DEFAULT_WORKER_PLAN)
   const [successOpen, setSuccessOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formError, setFormError] = useState<string | null>(null)
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const toggleJobType = (value: string) => {
+    setJobTypes((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    )
+  }
+
+  useEffect(() => {
+    if (jobTypes.length > 0) setJobTypeError(false)
+  }, [jobTypes])
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const form = e.currentTarget
+    setFormError(null)
+    if (jobTypes.length === 0) {
+      setJobTypeError(true)
+      return
+    }
     if (!form.checkValidity()) {
       form.reportValidity()
       return
     }
     if (!agreedToTerms) return
-    setSuccessOpen(true)
+    if (!district) {
+      setFormError("Please select your district.")
+      toast.error("Please select your district.")
+      return
+    }
+
+    const fd = new FormData(form)
+    const firstName = String(fd.get("firstName") ?? "").trim()
+    const lastName = String(fd.get("lastName") ?? "").trim()
+    const phone = String(fd.get("phone") ?? "").trim()
+    const emailRaw = String(fd.get("email") ?? "").trim()
+    const bio = String(fd.get("bio") ?? "").trim()
+    const areasServedRaw = String(fd.get("areasServed") ?? "").trim()
+    const experienceRaw = String(fd.get("experience") ?? "").trim()
+    const otherJobRaw = String(fd.get("otherJobType") ?? "").trim()
+
+    if (!emailRaw) {
+      setFormError("Email is required.")
+      toast.error("Please enter your email.")
+      return
+    }
+
+    if (!/^\d+$/.test(experienceRaw)) {
+      setFormError("Years of experience must be a whole number (0 or higher).")
+      toast.error("Use a whole number for years of experience.")
+      return
+    }
+    const yearsExperience = Number.parseInt(experienceRaw, 10)
+
+    setIsSubmitting(true)
+    try {
+      const { error } = await submitWorkerApplication({
+        first_name: firstName,
+        last_name: lastName,
+        worker_kind: workerKind,
+        phone,
+        email: normalizeEmail(emailRaw),
+        job_types: jobTypes,
+        other_job_type: jobTypes.includes("other") ? otherJobRaw || null : null,
+        years_experience: yearsExperience,
+        district,
+        areas_served: areasServedRaw ? areasServedRaw : null,
+        services_offered: services,
+        subscription_plan: plan,
+        bio,
+        terms_accepted_at: new Date().toISOString(),
+      })
+
+      if (error) {
+        if (isUniqueViolation(error)) {
+          const msg =
+            "This email is already registered. Use a different email or contact support if you need help."
+          setFormError(msg)
+          toast.error("Email already registered.")
+        } else {
+          setFormError(error.message || "Could not submit your application.")
+          toast.error("Something went wrong. Please try again.")
+        }
+        return
+      }
+
+      setSuccessOpen(true)
+      form.reset()
+      setJobTypes([])
+      setJobTypeError(false)
+      setServices([])
+      setServiceInput("")
+      setDistrict("")
+      setWorkerKind("individual")
+      setPlan(DEFAULT_WORKER_PLAN)
+      setAgreedToTerms(false)
+    } catch (err) {
+      const message =
+        err instanceof Error && err.message.includes("NEXT_PUBLIC_SUPABASE")
+          ? "Application form is not configured. Check environment variables."
+          : "Could not submit your application."
+      setFormError(message)
+      toast.error(message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const addService = () => {
@@ -113,71 +259,200 @@ export default function RegisterPage() {
               </p>
             </div>
 
-            <div className="flex flex-col gap-8 lg:flex-row">
+            <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-10">
               {/* Form */}
-              <div className="flex-1">
+              <div className="min-w-0 flex-1 lg:max-w-3xl">
                 <form
-                  className="rounded-2xl border border-border bg-card p-6 shadow-sm md:p-8"
+                  className="rounded-2xl border border-border bg-card p-6 shadow-md ring-1 ring-black/[0.04] dark:ring-white/10 sm:p-8 lg:p-10"
                   onSubmit={handleSubmit}
                 >
-                  {/* Native validation for controlled Radix selects */}
-                  <input type="hidden" name="_jobType" value={jobType} required aria-hidden />
-                  <input type="hidden" name="_district" value={district} required aria-hidden />
-                  <div className="space-y-6">
-                    {/* Personal Information */}
-                    <div>
-                      <h2 className="mb-4 text-lg font-semibold text-foreground">
-                        Personal Information
-                      </h2>
-                      <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-6 md:space-y-8">
+                    <RegisterFormSection
+                      title="Personal information"
+                      description="How we’ll reach you and how you appear on your profile."
+                    >
+                      <div className="grid gap-5 sm:grid-cols-2">
                         <div className="space-y-2">
-                          <Label htmlFor="fullName">Full Name *</Label>
-                          <Input id="fullName" placeholder="Enter your full name" required />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="phone">Phone Number *</Label>
-                          <Input id="phone" type="tel" placeholder={PHONE_INPUT_PLACEHOLDER} required />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="whatsapp">WhatsApp Number *</Label>
-                          <Input id="whatsapp" type="tel" placeholder={PHONE_INPUT_PLACEHOLDER} required />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="email">Email Address</Label>
-                          <Input id="email" type="email" placeholder="your@email.com" />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Service Information */}
-                    <div className="border-t border-border pt-6">
-                      <h2 className="mb-4 text-lg font-semibold text-foreground">
-                        Service Information
-                      </h2>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label htmlFor="jobType">Job Type *</Label>
-                          <ServiceTypeSelect
-                            id="jobType"
-                            value={jobType}
-                            onValueChange={setJobType}
-                            placeholder="Select your profession"
+                          <Label htmlFor="firstName" className="text-sm font-medium">
+                            First name *
+                          </Label>
+                          <Input
+                            id="firstName"
+                            name="firstName"
+                            className="h-11"
+                            autoComplete="given-name"
+                            placeholder="First name"
+                            required
                           />
                         </div>
-                        {jobType === "other" && (
-                          <div className="space-y-2">
-                            <Label htmlFor="otherJobType">Specify Job Type *</Label>
-                            <Input id="otherJobType" placeholder="Enter your profession" />
+                        <div className="space-y-2">
+                          <Label htmlFor="lastName" className="text-sm font-medium">
+                            Last name *
+                          </Label>
+                          <Input
+                            id="lastName"
+                            name="lastName"
+                            className="h-11"
+                            autoComplete="family-name"
+                            placeholder="Last name"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-3 sm:col-span-2">
+                          <Label id="worker-kind-label" className="text-sm font-medium">
+                            Registering as *
+                          </Label>
+                          <RadioGroup
+                            value={workerKind}
+                            onValueChange={(v) =>
+                              setWorkerKind(v as "individual" | "contractor")
+                            }
+                            className="grid gap-3 sm:grid-cols-2"
+                            aria-labelledby="worker-kind-label"
+                          >
+                            <label
+                              htmlFor="worker-kind-individual"
+                              className={cn(
+                                "flex cursor-pointer gap-3 rounded-xl border p-4 transition-colors",
+                                workerKind === "individual"
+                                  ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                                  : "border-border bg-background hover:bg-muted/40"
+                              )}
+                            >
+                              <RadioGroupItem
+                                value="individual"
+                                id="worker-kind-individual"
+                                className="mt-0.5 shrink-0"
+                              />
+                              <div className="min-w-0">
+                                <span className="font-semibold text-foreground">Individual</span>
+                                <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
+                                  Solo tradesperson or freelancer.
+                                </p>
+                              </div>
+                            </label>
+                            <label
+                              htmlFor="worker-kind-contractor"
+                              className={cn(
+                                "flex cursor-pointer gap-3 rounded-xl border p-4 transition-colors",
+                                workerKind === "contractor"
+                                  ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                                  : "border-border bg-background hover:bg-muted/40"
+                              )}
+                            >
+                              <RadioGroupItem
+                                value="contractor"
+                                id="worker-kind-contractor"
+                                className="mt-0.5 shrink-0"
+                              />
+                              <div className="min-w-0">
+                                <span className="font-semibold text-foreground">Contractor / company</span>
+                                <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
+                                  Business name, team, or company.
+                                </p>
+                              </div>
+                            </label>
+                          </RadioGroup>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="phone" className="text-sm font-medium">
+                            Phone / WhatsApp *
+                          </Label>
+                          <Input
+                            id="phone"
+                            name="phone"
+                            type="tel"
+                            className="h-11"
+                            autoComplete="tel"
+                            placeholder={PHONE_INPUT_PLACEHOLDER}
+                            required
+                          />
+                          <p className="text-xs leading-snug text-muted-foreground">
+                            Same number for calls and WhatsApp.
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="email" className="text-sm font-medium">
+                            Email *
+                          </Label>
+                          <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            className="h-11"
+                            autoComplete="email"
+                            placeholder="your@email.com"
+                            required
+                          />
+                          <p className="text-xs leading-snug text-muted-foreground">
+                            Used for your account — each email can register once.
+                          </p>
+                        </div>
+                      </div>
+                    </RegisterFormSection>
+
+                    <RegisterFormSection
+                      title="Service information"
+                      description="What you do and where you work in Mauritius."
+                    >
+                      <div className="grid gap-5 sm:grid-cols-2">
+                        <div className="space-y-2 sm:col-span-2">
+                          <Label id="job-types-label" className="text-sm font-medium">
+                            Job types *
+                          </Label>
+                          <p className="text-xs text-muted-foreground">Select all that apply.</p>
+                          <ServiceTypePills
+                            selected={jobTypes}
+                            onToggle={toggleJobType}
+                            labelId="job-types-label"
+                          />
+                          {jobTypeError && (
+                            <p className="text-sm text-destructive" role="alert">
+                              Select at least one job type.
+                            </p>
+                          )}
+                        </div>
+
+                        {jobTypes.includes("other") && (
+                          <div className="space-y-2 sm:col-span-2">
+                            <Label htmlFor="otherJobType" className="text-sm font-medium">
+                              Specify job type *
+                            </Label>
+                            <Input
+                              id="otherJobType"
+                              name="otherJobType"
+                              className="h-11 max-w-xl"
+                              placeholder="Enter your profession"
+                              required
+                            />
                           </div>
                         )}
+
                         <div className="space-y-2">
-                          <Label htmlFor="experience">Years of Experience *</Label>
-                          <Input id="experience" type="number" min="0" placeholder="e.g. 5" required />
+                          <Label htmlFor="experience" className="text-sm font-medium">
+                            Years of experience *
+                          </Label>
+                          <Input
+                            id="experience"
+                            name="experience"
+                            type="number"
+                            inputMode="numeric"
+                            min={0}
+                            step={1}
+                            className="h-11"
+                            placeholder="e.g. 5"
+                            required
+                          />
+                          <p className="text-xs text-muted-foreground">Whole numbers only (no decimals).</p>
                         </div>
-                        <div className="space-y-2 sm:col-span-2">
-                          <Label htmlFor="location">Your district *</Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="location" className="text-sm font-medium">
+                            District *
+                          </Label>
                           <Select value={district} onValueChange={setDistrict} required>
-                            <SelectTrigger id="location" className="w-full">
+                            <SelectTrigger id="location" className="h-11 w-full">
                               <SelectValue placeholder="Select your district" />
                             </SelectTrigger>
                             <SelectContent>
@@ -189,94 +464,180 @@ export default function RegisterPage() {
                             </SelectContent>
                           </Select>
                         </div>
+
                         <div className="space-y-2 sm:col-span-2">
-                          <Label htmlFor="areasServed">Areas Served</Label>
-                          <Input id="areasServed" placeholder="e.g. Curepipe, Vacoas, Phoenix" />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Services Offered */}
-                    <div className="border-t border-border pt-6">
-                      <h2 className="mb-4 text-lg font-semibold text-foreground">
-                        Services Offered
-                      </h2>
-                      <div className="space-y-3">
-                        <div className="flex gap-2">
+                          <Label htmlFor="areasServed" className="text-sm font-medium">
+                            Areas served
+                          </Label>
                           <Input
-                            value={serviceInput}
-                            onChange={(e) => setServiceInput(e.target.value)}
-                            onKeyPress={handleKeyPress}
-                            placeholder="Add a service (e.g. Pipe Repair)"
+                            id="areasServed"
+                            name="areasServed"
+                            className="h-11"
+                            placeholder="e.g. Curepipe, Vacoas, Phoenix"
                           />
-                          <Button type="button" variant="outline" onClick={addService}>
-                            Add
-                          </Button>
+                          <p className="text-xs text-muted-foreground">
+                            Towns or regions beyond your main district, if any.
+                          </p>
                         </div>
-                        {services.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {services.map((service) => (
-                              <Badge key={service} variant="secondary" className="gap-1 pr-1">
-                                {service}
-                                <button
-                                  type="button"
-                                  onClick={() => removeService(service)}
-                                  className="ml-1 rounded-full p-0.5 hover:bg-muted"
-                                >
-                                  <X className="h-3 w-3" />
-                                </button>
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
                       </div>
-                    </div>
+                    </RegisterFormSection>
 
-                    {/* Bio */}
-                    <div className="border-t border-border pt-6">
-                      <h2 className="mb-4 text-lg font-semibold text-foreground">
-                        About You
-                      </h2>
+                    <RegisterFormSection
+                      title="Services offered"
+                      description="List specific tasks customers can hire you for."
+                    >
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+                        <Input
+                          value={serviceInput}
+                          onChange={(e) => setServiceInput(e.target.value)}
+                          onKeyPress={handleKeyPress}
+                          className="h-11 min-w-0 flex-1"
+                          placeholder="e.g. Pipe repair, leak detection"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-11 shrink-0 sm:min-w-[5.5rem]"
+                          onClick={addService}
+                        >
+                          Add
+                        </Button>
+                      </div>
+                      {services.length > 0 && (
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          {services.map((service) => (
+                            <Badge key={service} variant="secondary" className="gap-1 pr-1">
+                              {service}
+                              <button
+                                type="button"
+                                onClick={() => removeService(service)}
+                                className="ml-1 rounded-full p-0.5 hover:bg-muted"
+                                aria-label={`Remove ${service}`}
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </RegisterFormSection>
+
+                    <RegisterFormSection
+                      title="Subscription plan *"
+                      description="Choose how you want to be billed once your profile is approved."
+                      headingId="subscription-plan-heading"
+                    >
+                      <RadioGroup
+                        value={plan}
+                        onValueChange={(v) => setPlan(v as WorkerPlanId)}
+                        className="grid gap-3 sm:grid-cols-2 sm:items-stretch"
+                        aria-labelledby="subscription-plan-heading"
+                      >
+                        <label
+                          htmlFor="plan-monthly"
+                          className={cn(
+                            "flex h-full min-h-[7.5rem] cursor-pointer flex-col rounded-2xl border p-4 transition-colors sm:min-h-0",
+                            plan === "monthly_100"
+                              ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                              : "border-border bg-background hover:bg-muted/40"
+                          )}
+                        >
+                          <div className="flex flex-1 items-start gap-3">
+                            <RadioGroupItem value="monthly_100" id="plan-monthly" className="mt-0.5" />
+                            <div className="min-w-0 flex-1 space-y-1">
+                              <span className="text-sm font-semibold text-foreground">Monthly</span>
+                              <p className="text-2xl font-bold tabular-nums text-foreground">
+                                Rs {WORKER_MONTHLY_RS}
+                                <span className="text-base font-semibold text-muted-foreground">
+                                  /month
+                                </span>
+                              </p>
+                              <p className="text-xs text-muted-foreground">Flexible — cancel anytime.</p>
+                            </div>
+                          </div>
+                        </label>
+                        <label
+                          htmlFor="plan-yearly"
+                          className={cn(
+                            "flex h-full min-h-[7.5rem] cursor-pointer flex-col rounded-2xl border p-4 transition-colors sm:min-h-0",
+                            plan === "yearly_1000"
+                              ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                              : "border-border bg-background hover:bg-muted/40"
+                          )}
+                        >
+                          <div className="flex flex-1 items-start gap-3">
+                            <RadioGroupItem value="yearly_1000" id="plan-yearly" className="mt-0.5" />
+                            <div className="min-w-0 flex-1 space-y-1">
+                              <span className="inline-flex flex-wrap items-center gap-2 text-sm font-semibold text-foreground">
+                                Yearly
+                                <span className="rounded-full bg-primary px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide text-primary-foreground">
+                                  Save {WORKER_YEARLY_SAVINGS_PCT}%
+                                </span>
+                              </span>
+                              <p className="text-2xl font-bold tabular-nums text-foreground">
+                                Rs {WORKER_YEARLY_RS.toLocaleString("en-MU")}
+                                <span className="text-base font-semibold text-muted-foreground">/year</span>
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Saves Rs {WORKER_YEARLY_SAVINGS_RS} vs 12 monthly payments.
+                              </p>
+                            </div>
+                          </div>
+                        </label>
+                      </RadioGroup>
+                    </RegisterFormSection>
+
+                    <RegisterFormSection title="About you">
                       <div className="space-y-2">
-                        <Label htmlFor="bio">Short Bio / Description *</Label>
+                        <Label htmlFor="bio" className="text-sm font-medium">
+                          Short bio / description *
+                        </Label>
                         <Textarea
                           id="bio"
-                          rows={4}
+                          name="bio"
+                          className="min-h-[8rem] resize-y"
+                          rows={5}
                           placeholder="Tell customers about yourself, your experience, and what makes your service special..."
                           required
                         />
                       </div>
-                    </div>
+                    </RegisterFormSection>
 
-                    {/* Terms */}
-                    <div className="border-t border-border pt-6">
-                      <div className="flex items-start gap-2">
+                    <div className="rounded-xl border border-border bg-muted/25 p-4 sm:p-5">
+                      <div className="flex items-start gap-3">
                         <Checkbox
                           id="terms"
                           checked={agreedToTerms}
                           onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
+                          className="mt-0.5"
                         />
-                        <Label htmlFor="terms" className="text-sm text-muted-foreground cursor-pointer">
+                        <Label htmlFor="terms" className="cursor-pointer text-sm leading-relaxed text-muted-foreground">
                           I agree to the{" "}
-                          <Link href="/terms" className="text-primary underline">
+                          <Link href="/terms" className="font-medium text-primary underline underline-offset-2">
                             Terms of Service
                           </Link>{" "}
                           and{" "}
-                          <Link href="/privacy" className="text-primary underline">
+                          <Link href="/privacy" className="font-medium text-primary underline underline-offset-2">
                             Privacy Policy
                           </Link>
+                          .
                         </Label>
                       </div>
                     </div>
 
-                    {/* Submit */}
+                    {formError ? (
+                      <p className="text-sm text-destructive" role="alert">
+                        {formError}
+                      </p>
+                    ) : null}
+
                     <Button
                       type="submit"
                       size="lg"
-                      className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
-                      disabled={!agreedToTerms}
+                      className="h-12 w-full text-base bg-accent text-accent-foreground hover:bg-accent/90"
+                      disabled={!agreedToTerms || isSubmitting}
                     >
-                      Register as a Worker
+                      {isSubmitting ? "Submitting…" : "Register as a worker"}
                     </Button>
                   </div>
                 </form>
@@ -348,6 +709,8 @@ export default function RegisterPage() {
         </div>
       </main>
       <Footer />
+
+      <Toaster richColors position="top-center" />
 
       <Dialog open={successOpen} onOpenChange={setSuccessOpen}>
         <DialogContent className="sm:max-w-md">
