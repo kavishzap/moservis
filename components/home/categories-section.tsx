@@ -18,16 +18,16 @@ import type { ServiceTypeValue } from "@/lib/search-options"
 const CATEGORY_ICONS: Partial<
   Record<ServiceTypeValue, { icon: LucideIcon; color: string }>
 > = {
-  electrician: { icon: Zap, color: "bg-amber-50 text-amber-600" },
-  plumber: { icon: Droplets, color: "bg-blue-50 text-blue-600" },
-  cleaner: { icon: Sparkles, color: "bg-purple-50 text-purple-600" },
-  gardener: { icon: Flower2, color: "bg-green-50 text-green-600" },
-  painter: { icon: Paintbrush, color: "bg-rose-50 text-rose-600" },
-  carpenter: { icon: Hammer, color: "bg-orange-50 text-orange-600" },
-  mason: { icon: Building2, color: "bg-slate-100 text-slate-600" },
-  handyman: { icon: Wrench, color: "bg-cyan-50 text-cyan-600" },
-  "ac-technician": { icon: Wind, color: "bg-sky-50 text-sky-600" },
-  mechanic: { icon: Car, color: "bg-red-50 text-red-600" },
+  electrician: { icon: Zap, color: "bg-zinc-950 text-amber-400 ring-1 ring-primary/30" },
+  plumber: { icon: Droplets, color: "bg-zinc-950 text-amber-400 ring-1 ring-primary/30" },
+  cleaner: { icon: Sparkles, color: "bg-zinc-950 text-amber-400 ring-1 ring-primary/30" },
+  gardener: { icon: Flower2, color: "bg-zinc-950 text-amber-400 ring-1 ring-primary/30" },
+  painter: { icon: Paintbrush, color: "bg-zinc-950 text-amber-400 ring-1 ring-primary/30" },
+  carpenter: { icon: Hammer, color: "bg-zinc-950 text-amber-400 ring-1 ring-primary/30" },
+  mason: { icon: Building2, color: "bg-zinc-950 text-amber-400 ring-1 ring-primary/30" },
+  handyman: { icon: Wrench, color: "bg-zinc-950 text-amber-400 ring-1 ring-primary/30" },
+  "ac-technician": { icon: Wind, color: "bg-zinc-950 text-amber-400 ring-1 ring-primary/30" },
+  mechanic: { icon: Car, color: "bg-zinc-950 text-amber-400 ring-1 ring-primary/30" },
 }
 
 const labelByValue = Object.fromEntries(SERVICE_TYPES.map((s) => [s.value, s.label])) as Record<
@@ -56,7 +56,7 @@ export function CategoriesSection() {
               <Link
                 key={value}
                 href={`/search?category=${value}`}
-                className="group flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-6 text-center transition-all hover:border-primary/30 hover:shadow-lg"
+                className="group flex flex-col items-center gap-3 rounded-2xl border border-primary/25 bg-card p-6 text-center transition-all hover:border-primary/50 hover:shadow-[0_0_24px_rgba(57,255,20,0.12)]"
               >
                 <div
                   className={`rounded-xl p-3 ${meta.color} transition-transform group-hover:scale-110`}

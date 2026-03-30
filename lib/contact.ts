@@ -1,8 +1,24 @@
-/** Platform line shown in footer / marketing (Mauritius). */
-export const SITE_CONTACT_PHONE = "+230 5123 4567"
+/** Platform WhatsApp lines (footer, marketing). */
+export const SITE_CONTACT_PHONES = ["+230 57833020", "+230 59182520"] as const
+
+/** Default message when opening WhatsApp to the platform. */
+export const PLATFORM_WHATSAPP_DEFAULT_MESSAGE = "Hello, I'm contacting ZotServis."
 
 /** Platform support email (footer, mailto links). */
-export const SITE_CONTACT_EMAIL = "hello@zotservis.mu"
+export const SITE_CONTACT_EMAIL = "zotservissupport@gmail.com"
+
+/** Pretty +230 XXXX XXXX for display. */
+export function formatSitePhoneDisplay(phone: string): string {
+  const d = normalizePhoneDigits(phone)
+  if (d.length === 11 && d.startsWith("230")) {
+    const local = d.slice(3)
+    return `+230 ${local.slice(0, 4)} ${local.slice(4)}`
+  }
+  if (d.length === 8 && d.startsWith("5")) {
+    return `+230 ${d.slice(0, 4)} ${d.slice(4)}`
+  }
+  return phone
+}
 
 /** Example format for phone fields on forms (not the platform line). */
 export const PHONE_INPUT_PLACEHOLDER = "+230 5XXX XXXX"

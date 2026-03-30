@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport = {
-  themeColor: '#1e3a5f',
+  themeColor: '#39ff14',
 }
 
 export default function RootLayout({
@@ -29,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body className={`${inter.variable} ${geistMono.variable} font-sans antialiased`}>
         {children}
         <Analytics />

@@ -15,10 +15,10 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-primary/20 bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/70">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary p-1">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-primary/40 bg-card p-1 shadow-[0_0_16px_rgba(57,255,20,0.15)]">
             <Image
               src="/logo.png"
               alt=""
@@ -28,7 +28,7 @@ export function Navbar() {
               priority
             />
           </span>
-          <span className="text-xl font-bold text-foreground">ZotServis</span>
+          <span className="text-xl font-bold tracking-tight text-foreground">ZotServis</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -45,7 +45,11 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
-          <Button size="sm" asChild>
+          <Button
+            size="sm"
+            className="rounded-full font-semibold text-white shadow-[0_0_18px_rgba(57,255,20,0.2)]"
+            asChild
+          >
             <Link href="/search">Find Workers</Link>
           </Button>
         </div>
@@ -75,7 +79,11 @@ export function Navbar() {
               </Link>
             ))}
             <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4">
-              <Button size="sm" asChild>
+              <Button
+                size="sm"
+                className="rounded-full font-semibold text-white shadow-[0_0_18px_rgba(57,255,20,0.2)]"
+                asChild
+              >
                 <Link href="/search" onClick={() => setIsOpen(false)}>
                   Find Workers
                 </Link>

@@ -10,8 +10,11 @@ import {
 import { SERVICE_TYPES } from "@/lib/search-options"
 import { cn } from "@/lib/utils"
 
-const heroTriggerClass =
-  "h-12 w-full border-0 bg-secondary/50 pl-10 text-base focus-visible:ring-1 focus-visible:ring-primary [&_svg]:text-muted-foreground"
+/** Hero search bar: dark field + white label/placeholder (readable on blue bg). */
+export const heroSearchSelectTriggerClassName =
+  "h-12 w-full rounded-lg border border-white/30 bg-white/5 pl-10 text-base text-white shadow-sm focus-visible:ring-2 focus-visible:ring-primary data-[placeholder]:text-white [&_[data-slot=select-value]]:text-white [&_[data-slot=select-value][data-placeholder]]:text-white [&_svg]:text-white/75"
+
+const heroTriggerClass = heroSearchSelectTriggerClassName
 
 const defaultTriggerClass = "w-full"
 

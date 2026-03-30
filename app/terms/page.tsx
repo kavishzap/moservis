@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { LegalDocLayout } from "@/components/legal-doc-layout"
 import { SITE_CONTACT_EMAIL } from "@/lib/contact"
+import { SiteWhatsAppPhoneLinks } from "@/components/site-whatsapp-phone-links"
 import {
   WORKER_MONTHLY_RS,
   WORKER_YEARLY_RS,
@@ -178,7 +179,8 @@ export default function TermsPage() {
       <h2>12. Contact</h2>
       <p>
         Questions about these Terms:{" "}
-        <a href={`mailto:${SITE_CONTACT_EMAIL}`}>{SITE_CONTACT_EMAIL}</a>. See also our{" "}
+        <a href={`mailto:${SITE_CONTACT_EMAIL}`}>{SITE_CONTACT_EMAIL}</a>. WhatsApp: <SiteWhatsAppPhoneLinks />.
+        See also our{" "}
         <Link href="/privacy">Privacy Policy</Link>.
       </p>
     </LegalDocLayout>

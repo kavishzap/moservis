@@ -1,7 +1,14 @@
 import Image from "next/image"
 import Link from "next/link"
-import { Phone, Mail, MapPin } from "lucide-react"
-import { SITE_CONTACT_EMAIL, SITE_CONTACT_PHONE, buildTelHref } from "@/lib/contact"
+import { Mail, MapPin } from "lucide-react"
+import { WhatsAppIcon } from "@/components/icons/whatsapp-icon"
+import {
+  SITE_CONTACT_EMAIL,
+  SITE_CONTACT_PHONES,
+  buildWhatsAppHref,
+  PLATFORM_WHATSAPP_DEFAULT_MESSAGE,
+  formatSitePhoneDisplay,
+} from "@/lib/contact"
 
 const platformLinks = [
   { href: "/", label: "Home" },
@@ -12,12 +19,12 @@ const platformLinks = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-secondary/30">
+    <footer className="border-t border-primary/20 bg-secondary/40">
       <div className="container mx-auto px-4 py-10 sm:px-6">
         <div className="grid gap-10 md:grid-cols-3">
           <div className="space-y-3">
             <Link href="/" className="inline-flex items-center gap-2">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary p-1">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-primary/35 bg-card p-1 shadow-[0_0_14px_rgba(57,255,20,0.12)]">
                 <Image
                   src="/logo.png"
                   alt=""
@@ -52,15 +59,19 @@ export function Footer() {
           <div>
             <h3 className="mb-3 text-sm font-semibold text-foreground">Contact</h3>
             <ul className="space-y-2">
-              <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Phone className="h-4 w-4 shrink-0" />
-                <a
-                  href={buildTelHref(SITE_CONTACT_PHONE)}
-                  className="transition-colors hover:text-foreground"
-                >
-                  {SITE_CONTACT_PHONE}
-                </a>
-              </li>
+              {SITE_CONTACT_PHONES.map((phone) => (
+                <li key={phone} className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <WhatsAppIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#25D366]" />
+                  <a
+                    href={buildWhatsAppHref(phone, PLATFORM_WHATSAPP_DEFAULT_MESSAGE)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-colors hover:text-foreground"
+                  >
+                    {formatSitePhoneDisplay(phone)}
+                  </a>
+                </li>
+              ))}
               <li className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4 shrink-0" />
                 <a

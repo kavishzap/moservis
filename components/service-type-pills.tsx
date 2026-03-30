@@ -28,12 +28,16 @@ export function ServiceTypePills({ selected, onToggle, className, labelId }: Ser
         const isOn = selected.includes(value)
         if (isOn) {
           return (
-            <Badge key={value} variant="secondary" className="h-8 gap-1 pr-1 text-sm font-medium">
+            <Badge
+              key={value}
+              variant="outline"
+              className="h-8 gap-1 rounded-full border-primary/50 bg-primary/15 pr-1 text-sm font-medium text-primary [a&]:hover:bg-primary/25"
+            >
               {label}
               <button
                 type="button"
                 onClick={() => onToggle(value)}
-                className="ml-0.5 rounded-full p-0.5 hover:bg-muted"
+                className="ml-0.5 rounded-full p-0.5 hover:bg-primary/20"
                 aria-label={`Remove ${label}`}
               >
                 <X className="h-3 w-3" />
@@ -47,7 +51,7 @@ export function ServiceTypePills({ selected, onToggle, className, labelId }: Ser
             type="button"
             onClick={() => onToggle(value)}
             aria-pressed={false}
-            className="inline-flex h-8 items-center rounded-full border border-dashed border-border bg-muted/30 px-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/45 hover:bg-muted/60 hover:text-foreground"
+            className="inline-flex h-8 items-center rounded-full border border-dashed border-primary/30 bg-muted/30 px-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/55 hover:bg-muted/60 hover:text-foreground"
           >
             {label}
           </button>

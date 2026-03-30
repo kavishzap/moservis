@@ -8,10 +8,10 @@ import { fetchActiveWorkers } from "@/lib/supabase/fetch-workers"
 
 function SearchHeader() {
   return (
-    <div className="border-b border-border bg-secondary/30 py-8">
+    <div className="border-b border-primary/20 bg-secondary/40 py-8">
       <div className="container mx-auto px-4">
-        <h1 className="text-2xl font-bold text-foreground md:text-3xl">
-          Find Workers Near You
+        <h1 className="text-2xl font-bold uppercase tracking-tight text-foreground md:text-3xl">
+          Find <span className="text-primary">Workers</span> Near You
         </h1>
       </div>
     </div>

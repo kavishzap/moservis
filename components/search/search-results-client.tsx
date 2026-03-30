@@ -79,7 +79,7 @@ function SearchResultsInner({ workers }: { workers: Worker[] }) {
           </div>
 
           {filtered.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-12 text-center">
+            <div className="rounded-2xl border border-dashed border-primary/30 bg-muted/30 px-6 py-12 text-center">
               <p className="font-medium text-foreground">
                 {workers.length === 0
                   ? "No active workers listed yet"
@@ -87,7 +87,7 @@ function SearchResultsInner({ workers }: { workers: Worker[] }) {
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
                 {workers.length === 0
-                  ? "Registrations will appear here once approved as active."
+                  ? "Launching on 11 APRIL 2024"
                   : "Try another district or job type, or clear filters to see everyone."}
               </p>
             </div>
@@ -100,7 +100,7 @@ function SearchResultsInner({ workers }: { workers: Worker[] }) {
               </div>
 
               {totalPages > 1 && (
-                <div className="mt-8 flex flex-col items-stretch gap-4 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
+                <div className="mt-8 flex flex-col items-stretch gap-4 border-t border-primary/20 pt-6 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-center text-sm text-muted-foreground sm:text-left">
                     Page <span className="font-medium text-foreground">{safePage}</span> of{" "}
                     <span className="font-medium text-foreground">{totalPages}</span>
@@ -110,6 +110,7 @@ function SearchResultsInner({ workers }: { workers: Worker[] }) {
                       type="button"
                       variant="outline"
                       size="sm"
+                      className="rounded-full border-primary/35"
                       disabled={safePage <= 1}
                       onClick={() => goToPage(safePage - 1)}
                     >
@@ -119,6 +120,7 @@ function SearchResultsInner({ workers }: { workers: Worker[] }) {
                       type="button"
                       variant="outline"
                       size="sm"
+                      className="rounded-full border-primary/35"
                       disabled={safePage >= totalPages}
                       onClick={() => goToPage(safePage + 1)}
                     >

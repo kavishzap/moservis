@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { LegalDocLayout } from "@/components/legal-doc-layout"
 import { SITE_CONTACT_EMAIL } from "@/lib/contact"
+import { SiteWhatsAppPhoneLinks } from "@/components/site-whatsapp-phone-links"
 
 export const metadata: Metadata = {
   title: "Privacy Policy | ZotServis",
@@ -22,7 +23,8 @@ export default function PrivacyPage() {
       <h2>1. Data controller</h2>
       <p>
         The data controller responsible for personal data processed through the Platform is ZotServis, operating
-        in Mauritius. Contact: <a href={`mailto:${SITE_CONTACT_EMAIL}`}>{SITE_CONTACT_EMAIL}</a>.
+        in Mauritius. Contact: <a href={`mailto:${SITE_CONTACT_EMAIL}`}>{SITE_CONTACT_EMAIL}</a>. WhatsApp:{" "}
+        <SiteWhatsAppPhoneLinks />.
       </p>
 
       <h2>2. What we collect</h2>
@@ -122,7 +124,7 @@ export default function PrivacyPage() {
         Subject to applicable law, you may have the right to access, rectify, erase, restrict, or object to
         certain processing, and to withdraw consent where processing is consent-based. You may also have the
         right to lodge a complaint with a supervisory authority in Mauritius. To exercise rights, contact{" "}
-        <a href={`mailto:${SITE_CONTACT_EMAIL}`}>{SITE_CONTACT_EMAIL}</a>.
+        <a href={`mailto:${SITE_CONTACT_EMAIL}`}>{SITE_CONTACT_EMAIL}</a> or WhatsApp: <SiteWhatsAppPhoneLinks />.
       </p>
 
       <h2>9. Cookies</h2>
@@ -154,7 +156,8 @@ export default function PrivacyPage() {
 
       <h2>13. Contact</h2>
       <p>
-        Privacy questions: <a href={`mailto:${SITE_CONTACT_EMAIL}`}>{SITE_CONTACT_EMAIL}</a>. See also our{" "}
+        Privacy questions: <a href={`mailto:${SITE_CONTACT_EMAIL}`}>{SITE_CONTACT_EMAIL}</a>. WhatsApp:{" "}
+        <SiteWhatsAppPhoneLinks />. See also our{" "}
         <Link href="/terms">Terms of Service</Link>.
       </p>
     </LegalDocLayout>

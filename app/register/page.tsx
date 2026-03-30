@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState, type FormEvent, type ReactNode } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
@@ -18,7 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
   DialogContent,
@@ -39,8 +37,7 @@ import {
 } from "@/lib/worker-pricing"
 import { cn } from "@/lib/utils"
 import { PHONE_INPUT_PLACEHOLDER } from "@/lib/contact"
-import { WORKER_PROMO_PNG } from "@/lib/promo-assets"
-import { CheckCircle2, Users, Phone, TrendingUp, Shield, X } from "lucide-react"
+import { CheckCircle2, Users, Phone, TrendingUp, Shield } from "lucide-react"
 import { toast, Toaster } from "sonner"
 import {
   isUniqueViolation,
@@ -110,8 +107,6 @@ function RegisterFormSection({
 export default function RegisterPage() {
   const [jobTypes, setJobTypes] = useState<string[]>([])
   const [jobTypeError, setJobTypeError] = useState(false)
-  const [services, setServices] = useState<string[]>([])
-  const [serviceInput, setServiceInput] = useState("")
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [district, setDistrict] = useState("")
   const [workerKind, setWorkerKind] = useState<"individual" | "contractor">("individual")
@@ -185,7 +180,7 @@ export default function RegisterPage() {
         years_experience: yearsExperience,
         district,
         areas_served: areasServedRaw ? areasServedRaw : null,
-        services_offered: services,
+        services_offered: [],
         subscription_plan: plan,
         bio,
         terms_accepted_at: new Date().toISOString(),
@@ -208,8 +203,6 @@ export default function RegisterPage() {
       form.reset()
       setJobTypes([])
       setJobTypeError(false)
-      setServices([])
-      setServiceInput("")
       setDistrict("")
       setWorkerKind("individual")
       setPlan(DEFAULT_WORKER_PLAN)
@@ -223,24 +216,6 @@ export default function RegisterPage() {
       toast.error(message)
     } finally {
       setIsSubmitting(false)
-    }
-  }
-
-  const addService = () => {
-    if (serviceInput.trim() && !services.includes(serviceInput.trim())) {
-      setServices([...services, serviceInput.trim()])
-      setServiceInput("")
-    }
-  }
-
-  const removeService = (service: string) => {
-    setServices(services.filter((s) => s !== service))
-  }
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault()
-      addService()
     }
   }
 
@@ -483,46 +458,6 @@ export default function RegisterPage() {
                     </RegisterFormSection>
 
                     <RegisterFormSection
-                      title="Services offered"
-                      description="List specific tasks customers can hire you for."
-                    >
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
-                        <Input
-                          value={serviceInput}
-                          onChange={(e) => setServiceInput(e.target.value)}
-                          onKeyPress={handleKeyPress}
-                          className="h-11 min-w-0 flex-1"
-                          placeholder="e.g. Pipe repair, leak detection"
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="h-11 shrink-0 sm:min-w-[5.5rem]"
-                          onClick={addService}
-                        >
-                          Add
-                        </Button>
-                      </div>
-                      {services.length > 0 && (
-                        <div className="flex flex-wrap gap-2 pt-1">
-                          {services.map((service) => (
-                            <Badge key={service} variant="secondary" className="gap-1 pr-1">
-                              {service}
-                              <button
-                                type="button"
-                                onClick={() => removeService(service)}
-                                className="ml-1 rounded-full p-0.5 hover:bg-muted"
-                                aria-label={`Remove ${service}`}
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </RegisterFormSection>
-
-                    <RegisterFormSection
                       title="Subscription plan *"
                       description="Choose how you want to be billed once your profile is approved."
                       headingId="subscription-plan-heading"
@@ -613,11 +548,21 @@ export default function RegisterPage() {
                         />
                         <Label htmlFor="terms" className="cursor-pointer text-sm leading-relaxed text-muted-foreground">
                           I agree to the{" "}
-                          <Link href="/terms" className="font-medium text-primary underline underline-offset-2">
+                          <Link
+                            href="/terms"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-primary underline underline-offset-2"
+                          >
                             Terms of Service
                           </Link>{" "}
                           and{" "}
-                          <Link href="/privacy" className="font-medium text-primary underline underline-offset-2">
+                          <Link
+                            href="/privacy"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-primary underline underline-offset-2"
+                          >
                             Privacy Policy
                           </Link>
                           .
@@ -653,15 +598,6 @@ export default function RegisterPage() {
                     List your business and receive leads from customers across Mauritius. Workers pay a simple
                     subscription to stay visible on the platform.
                   </p>
-                  <div className="relative mb-6 min-h-[160px] w-full">
-                    <Image
-                      src={WORKER_PROMO_PNG}
-                      alt="Professional worker representing ZotServis"
-                      fill
-                      className="object-contain object-bottom"
-                      sizes="320px"
-                    />
-                  </div>
                   <div className="space-y-6">
                     {benefits.map((benefit) => (
                       <div key={benefit.title} className="flex gap-4">
