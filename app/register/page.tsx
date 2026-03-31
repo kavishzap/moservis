@@ -418,6 +418,12 @@ export default function RegisterPage() {
                             className="h-11"
                             placeholder="e.g. 5"
                             required
+                            onKeyDown={(event) => {
+                              const invalidKeys = ["e", "E", "+", "-", ".", ","]
+                              if (invalidKeys.includes(event.key)) {
+                                event.preventDefault()
+                              }
+                            }}
                           />
                           <p className="text-xs text-muted-foreground">Whole numbers only (no decimals).</p>
                         </div>

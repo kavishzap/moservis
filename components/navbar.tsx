@@ -40,6 +40,14 @@ function SectionNavLink({
   const isHome = pathname === "/"
 
   if (isHome) {
+    if (sectionId === "become-a-worker") {
+      return (
+        <Link href="/register" className={className} onClick={() => onNavigate?.()}>
+          {label}
+        </Link>
+      )
+    }
+
     return (
       <a
         href={`#${sectionId}`}
@@ -52,7 +60,11 @@ function SectionNavLink({
   }
 
   return (
-    <Link href={`/#${sectionId}`} className={className} onClick={() => onNavigate?.()}>
+    <Link
+      href={sectionId === "become-a-worker" ? "/register" : `/#${sectionId}`}
+      className={className}
+      onClick={() => onNavigate?.()}
+    >
       {label}
     </Link>
   )
