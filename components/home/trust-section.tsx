@@ -27,20 +27,19 @@ const trustItems = [
 export function TrustSection() {
   return (
     <section
-      className="relative overflow-hidden border-y border-primary/15 bg-secondary/30 py-16 md:py-24"
+      id="why-choose-us"
+      className="scroll-mt-20 relative overflow-hidden border-y border-primary/10 bg-secondary/25 py-16 md:py-24"
       aria-labelledby="trust-section-heading"
     >
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute left-1/4 top-0 h-72 w-72 -translate-x-1/2 rounded-full bg-primary/[0.12] blur-3xl" />
-        <div className="absolute bottom-0 right-0 h-80 w-80 translate-x-1/4 translate-y-1/4 rounded-full bg-primary/[0.08] blur-3xl" />
+        <div className="absolute left-1/4 top-0 h-80 w-80 -translate-x-1/2 rounded-full bg-primary/[0.075] blur-3xl" />
+        <div className="absolute bottom-0 right-0 h-96 w-96 translate-x-1/4 translate-y-1/4 rounded-full bg-primary/[0.055] blur-3xl" />
+        <div className="absolute left-0 top-1/2 h-72 w-72 -translate-x-1/3 -translate-y-1/2 rounded-full bg-primary/[0.038] blur-3xl" />
       </div>
 
       <div className="container mx-auto max-w-6xl px-4 sm:px-6">
         {/* Heading block */}
         <div className="mx-auto mb-12 max-w-2xl text-center md:mb-14">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.12em] text-primary">
-            Why choose us
-          </p>
           <h2
             id="trust-section-heading"
             className="mb-4 text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl"

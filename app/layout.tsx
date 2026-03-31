@@ -1,26 +1,27 @@
 import type { Metadata } from 'next'
-import { Inter, Geist_Mono } from 'next/font/google'
+import { Poppins, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-const inter = Inter({ 
+const poppins = Poppins({
   subsets: ["latin"],
-  variable: "--font-inter"
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-poppins",
 })
 
-const geistMono = Geist_Mono({ 
+const geistMono = Geist_Mono({
   subsets: ["latin"],
-  variable: "--font-geist-mono"
+  variable: "--font-geist-mono",
 })
 
 export const metadata: Metadata = {
-  title: 'ZotServis - Tou servis, pre ar zot',
+  title: 'ZotServis',
   description: 'Find trusted workers near you in Mauritius. Electricians, plumbers, cleaners, gardeners and more.',
   keywords: ['Mauritius', 'workers', 'services', 'electrician', 'plumber', 'cleaner', 'gardener', 'local services'],
 }
 
 export const viewport = {
-  themeColor: '#39ff14',
+  themeColor: '#f59e0b',
 }
 
 export default function RootLayout({
@@ -30,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.variable} ${geistMono.variable} font-sans antialiased`}>
+      <body className={`${poppins.variable} ${geistMono.variable} font-sans antialiased`}>
         {children}
         <Analytics />
       </body>

@@ -10,9 +10,9 @@ import {
 import { SERVICE_TYPES } from "@/lib/search-options"
 import { cn } from "@/lib/utils"
 
-/** Hero search bar: dark field + white label/placeholder (readable on blue bg). */
+/** Hero search bar: glass row, pill fields (readable on photo + overlay). */
 export const heroSearchSelectTriggerClassName =
-  "h-12 w-full rounded-lg border border-white/30 bg-white/5 pl-10 text-base text-white shadow-sm focus-visible:ring-2 focus-visible:ring-primary data-[placeholder]:text-white [&_[data-slot=select-value]]:text-white [&_[data-slot=select-value][data-placeholder]]:text-white [&_svg]:text-white/75"
+  "h-10 w-full rounded-full border-0 bg-white/[0.06] pl-10 text-sm text-white shadow-none ring-1 ring-inset ring-white/10 transition-colors hover:bg-white/[0.09] focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-0 data-[placeholder]:text-white/70 [&_[data-slot=select-value]]:text-white [&_[data-slot=select-value][data-placeholder]]:text-white/70 [&_svg]:text-white/60 sm:text-base"
 
 const heroTriggerClass = heroSearchSelectTriggerClassName
 

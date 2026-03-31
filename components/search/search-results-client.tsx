@@ -87,7 +87,7 @@ function SearchResultsInner({ workers }: { workers: Worker[] }) {
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
                 {workers.length === 0
-                  ? "Launching on 11 APRIL 2024"
+                  ? "Launching on 11th April 2026"
                   : "Try another district or job type, or clear filters to see everyone."}
               </p>
             </div>

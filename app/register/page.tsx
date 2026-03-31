@@ -154,9 +154,9 @@ export default function RegisterPage() {
     const experienceRaw = String(fd.get("experience") ?? "").trim()
     const otherJobRaw = String(fd.get("otherJobType") ?? "").trim()
 
-    if (!emailRaw) {
-      setFormError("Email is required.")
-      toast.error("Please enter your email.")
+    if (emailRaw && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailRaw)) {
+      setFormError("Please enter a valid email address.")
+      toast.error("Please enter a valid email address.")
       return
     }
 
@@ -174,7 +174,7 @@ export default function RegisterPage() {
         last_name: lastName,
         worker_kind: workerKind,
         phone,
-        email: normalizeEmail(emailRaw),
+        email: emailRaw ? normalizeEmail(emailRaw) : null,
         job_types: jobTypes,
         other_job_type: jobTypes.includes("other") ? otherJobRaw || null : null,
         years_experience: yearsExperience,
@@ -350,7 +350,7 @@ export default function RegisterPage() {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="email" className="text-sm font-medium">
-                            Email *
+                            Email
                           </Label>
                           <Input
                             id="email"
@@ -359,10 +359,9 @@ export default function RegisterPage() {
                             className="h-11"
                             autoComplete="email"
                             placeholder="your@email.com"
-                            required
                           />
                           <p className="text-xs leading-snug text-muted-foreground">
-                            Used for your account — each email can register once.
+                            Optional. If provided, used for your account — each email can register once.
                           </p>
                         </div>
                       </div>
@@ -427,7 +426,10 @@ export default function RegisterPage() {
                             District *
                           </Label>
                           <Select value={district} onValueChange={setDistrict} required>
-                            <SelectTrigger id="location" className="h-11 w-full">
+                            <SelectTrigger
+                              id="location"
+                              className="!h-11 min-h-11 w-full py-0"
+                            >
                               <SelectValue placeholder="Select your district" />
                             </SelectTrigger>
                             <SelectContent>

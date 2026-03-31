@@ -6,6 +6,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { AmberAmbientBlurs } from "@/components/home/amber-ambient"
 
 const faqs = [
   {
@@ -33,8 +34,12 @@ const faqs = [
 
 export function FAQSection() {
   return (
-    <section id="faq" className="py-16 md:py-24">
-      <div className="container mx-auto px-4">
+    <section
+      id="faq"
+      className="scroll-mt-20 relative overflow-hidden py-16 md:py-24"
+    >
+      <AmberAmbientBlurs />
+      <div className="container relative z-0 mx-auto px-4">
         <div className="mb-12 text-center">
           <h2 className="mb-3 text-3xl font-bold text-foreground md:text-4xl">
             Frequently Asked Questions

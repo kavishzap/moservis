@@ -14,6 +14,7 @@ import {
 } from "lucide-react"
 import { BROWSE_CATEGORY_ORDER, SERVICE_TYPES } from "@/lib/search-options"
 import type { ServiceTypeValue } from "@/lib/search-options"
+import { AmberAmbientBlurs } from "@/components/home/amber-ambient"
 
 const CATEGORY_ICONS: Partial<
   Record<ServiceTypeValue, { icon: LucideIcon; color: string }>
@@ -37,8 +38,12 @@ const labelByValue = Object.fromEntries(SERVICE_TYPES.map((s) => [s.value, s.lab
 
 export function CategoriesSection() {
   return (
-    <section id="categories" className="py-16 md:py-24">
-      <div className="container mx-auto px-4">
+    <section
+      id="categories"
+      className="scroll-mt-20 relative overflow-hidden py-16 md:py-24"
+    >
+      <AmberAmbientBlurs />
+      <div className="container relative z-0 mx-auto px-4">
         <div className="mb-12 text-center">
           <h2 className="mb-3 text-3xl font-bold text-foreground md:text-4xl">
             Browse by Category
@@ -56,7 +61,7 @@ export function CategoriesSection() {
               <Link
                 key={value}
                 href={`/search?category=${value}`}
-                className="group flex flex-col items-center gap-3 rounded-2xl border border-primary/25 bg-card p-6 text-center transition-all hover:border-primary/50 hover:shadow-[0_0_24px_rgba(57,255,20,0.12)]"
+                className="group flex flex-col items-center gap-3 rounded-2xl border border-primary/25 bg-card p-6 text-center transition-all hover:border-primary/50 hover:shadow-[0_0_24px_rgba(245,158,11,0.16)]"
               >
                 <div
                   className={`rounded-xl p-3 ${meta.color} transition-transform group-hover:scale-110`}

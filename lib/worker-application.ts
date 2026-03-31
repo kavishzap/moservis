@@ -6,7 +6,7 @@ export type WorkerApplicationInsert = {
   last_name: string
   worker_kind: "individual" | "contractor"
   phone: string
-  email: string
+  email: string | null
   job_types: string[]
   other_job_type: string | null
   years_experience: number

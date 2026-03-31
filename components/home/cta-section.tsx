@@ -7,6 +7,7 @@ import {
   WORKER_YEARLY_SAVINGS_PCT,
   WORKER_YEARLY_SAVINGS_RS,
 } from "@/lib/worker-pricing"
+import { AmberAmbientBlurs } from "@/components/home/amber-ambient"
 
 const benefits = [
   {
@@ -33,9 +34,15 @@ const benefits = [
 
 export function CTASection() {
   return (
-    <section className="py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-zinc-950 to-black shadow-xl shadow-black/40">
+    <section
+      id="become-a-worker"
+      className="scroll-mt-20 relative overflow-hidden py-16 md:py-24"
+    >
+      <AmberAmbientBlurs />
+      <div className="container relative z-0 mx-auto px-4">
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-zinc-950 to-black shadow-xl shadow-black/50 ring-1 ring-primary/[0.05]">
+          <div className="pointer-events-none absolute -right-20 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-primary/[0.055] blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-primary/[0.035] blur-3xl" aria-hidden />
           <div className="relative grid items-start gap-10 p-8 md:grid-cols-2 md:items-center md:gap-12 md:p-12 lg:p-16">
             {/* Left Content */}
             <div className="flex flex-col items-center text-center md:items-start md:text-left">
@@ -45,7 +52,7 @@ export function CTASection() {
               <h2 className="mb-4 max-w-xl text-balance text-3xl font-bold leading-[1.15] tracking-tight md:text-4xl lg:text-[2.35rem]">
                 <span className="block text-white drop-shadow-[0_0_24px_rgba(255,255,255,0.08)]">
                   Join{" "}
-                  <span className="bg-gradient-to-r from-primary via-[#7fff6a] to-primary bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-primary via-[#fde68a] to-primary bg-clip-text text-transparent">
                     ZotServis
                   </span>
                 </span>
@@ -56,7 +63,7 @@ export function CTASection() {
               <p className="mb-4 max-w-xl text-pretty text-base leading-relaxed text-white/70 md:text-lg">
                 Register your profile and start receiving job requests from customers across Mauritius.
               </p>
-              <div className="mb-8 w-full max-w-xl rounded-2xl border border-primary/35 bg-primary/[0.06] p-5 text-left shadow-[inset_0_1px_0_0_rgba(57,255,20,0.12)]">
+              <div className="mb-8 w-full max-w-xl rounded-2xl border border-primary/35 bg-primary/[0.06] p-5 text-left shadow-[inset_0_1px_0_0_rgba(245,158,11,0.18)]">
                 <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-primary">
                   Pricing
                 </p>
@@ -86,7 +93,7 @@ export function CTASection() {
                 <Link href="/register" className="block w-full md:inline-block md:w-auto">
                   <Button
                     size="lg"
-                    className="h-12 w-full rounded-full px-8 font-semibold text-white shadow-[0_0_24px_rgba(57,255,20,0.25)] md:w-auto"
+                    className="h-12 w-full rounded-full px-8 font-semibold shadow-[0_0_24px_rgba(245,158,11,0.35)] md:w-auto"
                   >
                     Register as a Worker
                   </Button>

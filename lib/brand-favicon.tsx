@@ -2,13 +2,15 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { ImageResponse } from 'next/og'
 
-/** Matches `viewport.themeColor` / primary brand plate */
-export const BRAND_ICON_BG = '#1e3a5f'
+/** Amber-500 — matches `viewport.themeColor` / tab theme */
+export const BRAND_ICON_BG = '#e28e00'
+
+const ICON_FILENAME = 'zotserviceicon.png'
 
 export async function brandIconImageResponse(size: number) {
-  const buf = await readFile(join(process.cwd(), 'public', 'logo.png'))
+  const buf = await readFile(join(process.cwd(), 'public', ICON_FILENAME))
   const src = `data:image/png;base64,${buf.toString('base64')}`
-  const inner = Math.round(size * 0.68)
+  const inner = Math.round(size * 0.85)
 
   return new ImageResponse(
     (
@@ -20,7 +22,7 @@ export async function brandIconImageResponse(size: number) {
           alignItems: 'center',
           justifyContent: 'center',
           background: BRAND_ICON_BG,
-          borderRadius: Math.max(4, Math.round(size * 0.18)),
+          borderRadius: size / 2,
         }}
       >
         <img

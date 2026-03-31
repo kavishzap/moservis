@@ -147,7 +147,7 @@ function FilterContent() {
 export function SearchFiltersSidebar() {
   return (
     <aside className="hidden w-64 shrink-0 lg:block">
-      <div className="sticky top-24 rounded-2xl border border-primary/25 bg-card p-5 shadow-[0_0_24px_rgba(57,255,20,0.08)] sm:p-6">
+      <div className="sticky top-24 rounded-2xl border border-primary/25 bg-card p-5 shadow-[0_0_24px_rgba(245,158,11,0.12)] sm:p-6">
         <h2 className="mb-5 text-lg font-semibold uppercase tracking-wide text-foreground">Filters</h2>
         <FilterContent />
       </div>

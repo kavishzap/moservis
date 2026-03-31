@@ -13,7 +13,7 @@ interface WorkerCardProps {
 
 export function WorkerCard({ worker }: WorkerCardProps) {
   return (
-    <div className="group rounded-2xl border border-primary/25 bg-card p-6 shadow-[0_0_20px_rgba(57,255,20,0.06)] transition-all hover:border-primary/50 hover:shadow-[0_0_28px_rgba(57,255,20,0.12)]">
+    <div className="group rounded-2xl border border-primary/25 bg-card p-6 shadow-[0_0_20px_rgba(245,158,11,0.1)] transition-all hover:border-primary/50 hover:shadow-[0_0_28px_rgba(245,158,11,0.16)]">
       <div className="flex flex-col gap-4 sm:flex-row">
         <Avatar className="h-16 w-16 shrink-0">
           <AvatarFallback className="bg-primary text-lg text-primary-foreground">
