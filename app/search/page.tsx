@@ -1,10 +1,17 @@
 import { Suspense } from "react"
-
-export const dynamic = "force-dynamic"
+import type { Metadata } from "next"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { SearchResultsClient } from "@/components/search/search-results-client"
 import { fetchActiveWorkers } from "@/lib/supabase/fetch-workers"
+
+export const dynamic = "force-dynamic"
+
+export const metadata: Metadata = {
+  title: "Search Workers Across Mauritius | ZotServis",
+  description:
+    "Search electricians, plumbers, cleaners, gardeners and more across Mauritius. Filter by job type and district to find trusted workers near you.",
+}
 
 function SearchHeader() {
   return (

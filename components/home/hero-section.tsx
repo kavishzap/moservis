@@ -83,7 +83,8 @@ export function HeroSection() {
             className="hero-animate-in mb-10 w-full max-w-xl text-pretty text-center text-base leading-relaxed text-white/80 max-md:mx-auto sm:text-lg"
             style={{ animationDelay: "160ms" }}
           >
-            Electricians, plumbers, cleaners, gardeners and more across Mauritius.
+            Electricians, plumbers, cleaners, gardeners and more across Mauritius — a simple way to
+            find trusted local workers when you need them.
           </p>
 
           <div
