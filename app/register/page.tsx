@@ -552,7 +552,7 @@ export default function RegisterPage() {
                           id="terms"
                           checked={agreedToTerms}
                           onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
-                          className="mt-0.5"
+                          className="mt-0.5 border-2 border-white bg-white text-primary shadow-sm ring-1 ring-black/10 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-primary focus-visible:border-white focus-visible:ring-2 focus-visible:ring-white/60 dark:ring-white/25"
                         />
                         <Label htmlFor="terms" className="cursor-pointer text-sm leading-relaxed text-muted-foreground">
                           I agree to the{" "}
