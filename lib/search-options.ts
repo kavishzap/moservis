@@ -15,6 +15,7 @@ export const SERVICE_TYPES = [
   { label: "CCTV Installer", value: "cctv-installer" },
   { label: "Housemaid", value: "housemaid" },
   { label: "Babysitter", value: "babysitter" },
+  { label: "Waste transportation", value: "waste-transportation" },
   { label: "Other", value: "other" },
 ] as const
 
