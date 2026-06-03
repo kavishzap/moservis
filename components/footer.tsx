@@ -3,6 +3,7 @@ import Link from "next/link"
 import { Facebook, Mail, MapPin, Phone } from "lucide-react"
 import { WhatsAppIcon } from "@/components/icons/whatsapp-icon"
 import { TikTokIcon } from "@/components/icons/tiktok-icon"
+import { FooterNavLinks } from "@/components/footer-nav-links"
 import {
   SITE_CONTACT_PHONE,
   SITE_CONTACT_EMAIL,
@@ -12,13 +13,6 @@ import {
   buildWhatsAppHref,
   PLATFORM_WHATSAPP_DEFAULT_MESSAGE,
 } from "@/lib/contact"
-
-const sectionLinks = [
-  { href: "/#categories", label: "Category" },
-  { href: "/#why-choose-us", label: "Why choose us" },
-  { href: "/#become-a-worker", label: "Join as a Worker" },
-  { href: "/#faq", label: "FAQ" },
-] as const
 
 const legalLinks = [
   { href: "/privacy", label: "Privacy Policy" },
@@ -56,18 +50,7 @@ export function Footer() {
             <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/55 sm:text-[0.8125rem]">
               Sections
             </h3>
-            <ul className="space-y-1.5">
-              {sectionLinks.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className={footerLinkClassName}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <FooterNavLinks />
           </div>
 
           {/* Legal */}

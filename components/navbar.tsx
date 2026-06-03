@@ -17,36 +17,19 @@ import {
   PLATFORM_WHATSAPP_DEFAULT_MESSAGE,
   formatSitePhoneDisplay,
 } from "@/lib/contact"
-import { AUTH_PATHS } from "@/lib/auth-urls"
 import { goldButtonClassName } from "@/lib/brand-buttons"
 import { heroContainer } from "@/lib/site-layout"
-import { scrollToSection, markSkipNextHashScroll } from "@/lib/scroll-to-section"
+import { markSkipNextHashScroll } from "@/lib/scroll-to-section"
+import { headerNavItems, type SiteNavItem } from "@/lib/site-nav"
+import { SiteSectionNavLink } from "@/components/site-section-nav-link"
 import { supabase } from "@/lib/supabase"
 import { cn } from "@/lib/utils"
-
-type NavItem = {
-  key: string
-  id: string
-  label: string
-  href?: string
-}
-
-const sectionNav: NavItem[] = [
-  { key: "community", id: "why-choose-us", label: "Community" },
-  { key: "categories", id: "categories", label: "Browse by Category" },
-  { key: "faq", id: "faq", label: "FAQ" },
-  { key: "join-worker", id: "become-a-worker", label: "Join as a Worker" },
-]
 
 const desktopNavLinkClassName =
   "nav-link-underline whitespace-nowrap text-sm font-medium text-slate transition-colors duration-300 ease-out hover:text-teal"
 
 const mobileNavLinkClassName =
   "nav-link-underline rounded-lg px-3 py-3 text-base font-medium text-slate transition-colors duration-300 ease-out hover:bg-secondary/80 hover:text-teal"
-
-function blurNavLink(e: React.MouseEvent<HTMLAnchorElement>) {
-  e.currentTarget.blur()
-}
 
 function useWorkerLoggedIn() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -71,81 +54,6 @@ function useWorkerLoggedIn() {
   }, [])
 
   return isLoggedIn
-}
-
-function SectionNavLink({
-  sectionId,
-  label,
-  href,
-  className,
-  onNavigate,
-}: {
-  sectionId: string
-  label: string
-  href?: string
-  className?: string
-  onNavigate?: () => void
-}) {
-  const pathname = usePathname()
-  const router = useRouter()
-  const isHome = pathname === "/"
-
-  if (href) {
-    return (
-      <Link
-        href={href}
-        className={className}
-        onClick={(e) => {
-          onNavigate?.()
-          blurNavLink(e)
-        }}
-      >
-        {label}
-      </Link>
-    )
-  }
-
-  if (sectionId === "become-a-worker") {
-    return (
-      <Link
-        href="/register"
-        className={className}
-        onClick={(e) => {
-          onNavigate?.()
-          blurNavLink(e)
-        }}
-      >
-        {label}
-      </Link>
-    )
-  }
-
-  const hashHref = isHome ? `#${sectionId}` : `/#${sectionId}`
-
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    onNavigate?.()
-    blurNavLink(e)
-
-    if (isHome) {
-      e.preventDefault()
-      scrollToSection(sectionId)
-      return
-    }
-
-    e.preventDefault()
-    router.push(hashHref)
-  }
-
-  return (
-    <Link
-      href={hashHref}
-      className={className}
-      scroll={false}
-      onClick={handleClick}
-    >
-      {label}
-    </Link>
-  )
 }
 
 function MobileDrawerContact({ onNavigate }: { onNavigate: () => void }) {
@@ -251,11 +159,7 @@ export function Navbar() {
     }
   }, [pathname])
 
-  const authNavItem: NavItem = isLoggedIn
-    ? { key: "profile", id: "profile", label: "Profile", href: AUTH_PATHS.dashboardProfile }
-    : { key: "login", id: "login", label: "Log In", href: AUTH_PATHS.login }
-
-  const navItems: NavItem[] = [...sectionNav, authNavItem]
+  const navItems: SiteNavItem[] = headerNavItems(isLoggedIn)
 
   useEffect(() => {
     if (!isOpen) return
@@ -289,12 +193,18 @@ export function Navbar() {
         <div className="hidden min-w-0 flex-1 items-center justify-end gap-3 lg:gap-5 md:flex">
           <nav className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1 lg:gap-x-5">
             {navItems.map((item) => (
-              <SectionNavLink
+              <SiteSectionNavLink
                 key={item.key}
                 sectionId={item.id}
                 label={item.label}
                 href={item.href}
                 className={desktopNavLinkClassName}
+                onNavigate={() => {
+                  const active = document.activeElement
+                  if (active instanceof HTMLElement && active.classList.contains("nav-link-underline")) {
+                    active.blur()
+                  }
+                }}
               />
             ))}
           </nav>
@@ -359,7 +269,7 @@ export function Navbar() {
             <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-4 pb-6">
               <nav className="shrink-0 flex flex-col gap-1">
                 {navItems.map((item) => (
-                  <SectionNavLink
+                  <SiteSectionNavLink
                     key={item.key}
                     sectionId={item.id}
                     label={item.label}
