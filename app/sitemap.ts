@@ -10,7 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
-      url: `${siteUrl}/search`,
+      url: `${siteUrl}/worker`,
       changeFrequency: "daily",
       priority: 0.9,
     },

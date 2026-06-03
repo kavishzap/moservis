@@ -1,6 +1,6 @@
- "use client"
+"use client"
 
-import { useEffect, useState, type FormEvent, type ReactNode } from "react"
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
@@ -26,7 +26,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { MAURITIUS_DISTRICTS } from "@/lib/search-options"
-import { ServiceTypePills } from "@/components/service-type-pills"
+import { districtLabelForApi } from "@/lib/worker-dashboard"
+import { Badge } from "@/components/ui/badge"
 import {
   DEFAULT_WORKER_PLAN,
   WORKER_MONTHLY_RS,
@@ -37,13 +38,15 @@ import {
 } from "@/lib/worker-pricing"
 import { cn } from "@/lib/utils"
 import { PHONE_INPUT_PLACEHOLDER } from "@/lib/contact"
-import { CheckCircle2, Users, Phone, TrendingUp, Shield } from "lucide-react"
-import { toast, Toaster } from "sonner"
+import { AUTH_PATHS } from "@/lib/auth-urls"
+import { CheckCircle2, Loader2, Users, Phone, TrendingUp, Shield, X } from "lucide-react"
+import { toast } from "@/lib/toast"
+import { normalizeEmail } from "@/lib/worker-application"
 import {
-  isUniqueViolation,
-  normalizeEmail,
-  submitWorkerApplication,
-} from "@/lib/worker-application"
+  getServiceCategories,
+  type ServiceCategory,
+} from "@/services/categoryService"
+import { registerWorker } from "@/services/workerService"
 
 const benefits = [
   {
@@ -68,6 +71,82 @@ const benefits = [
   },
 ]
 
+function planToSubscription(plan: WorkerPlanId): "Monthly" | "Yearly" {
+  return plan === "monthly_100" ? "Monthly" : "Yearly"
+}
+
+function workerKindToType(kind: "individual" | "contractor"): "Individual" | "Company" {
+  return kind === "individual" ? "Individual" : "Company"
+}
+
+function isDuplicateRegistrationError(message: string): boolean {
+  const m = message.toLowerCase()
+  return (
+    m.includes("already") ||
+    m.includes("duplicate") ||
+    m.includes("registered") ||
+    m.includes("exists")
+  )
+}
+
+function RequiredStar() {
+  return (
+    <span className="text-destructive" aria-hidden>
+      *
+    </span>
+  )
+}
+
+function SelectionPills({
+  items,
+  selectedIds,
+  onToggle,
+  labelId,
+}: {
+  items: { id: string; name: string }[]
+  selectedIds: string[]
+  onToggle: (id: string) => void
+  labelId?: string
+}) {
+  return (
+    <div className="flex flex-wrap gap-2" role="group" aria-labelledby={labelId}>
+      {items.map(({ id, name }) => {
+        const isOn = selectedIds.includes(id)
+        if (isOn) {
+          return (
+            <Badge
+              key={id}
+              variant="outline"
+              className="h-8 gap-1 rounded-full border-teal/50 bg-teal/10 pr-1 text-sm font-medium text-teal [a&]:hover:bg-teal/20"
+            >
+              {name}
+              <button
+                type="button"
+                onClick={() => onToggle(id)}
+                className="ml-0.5 rounded-full p-0.5 hover:bg-teal/20"
+                aria-label={`Remove ${name}`}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          )
+        }
+        return (
+          <button
+            key={id}
+            type="button"
+            onClick={() => onToggle(id)}
+            aria-pressed={false}
+            className="inline-flex h-8 items-center rounded-full border border-dashed border-teal/30 bg-muted/30 px-3 text-sm font-medium text-muted-foreground transition-colors hover:border-teal/50 hover:bg-muted/60 hover:text-foreground"
+          >
+            {name}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 function RegisterFormSection({
   title,
   description,
@@ -75,7 +154,7 @@ function RegisterFormSection({
   className,
   headingId,
 }: {
-  title: string
+  title: ReactNode
   description?: string
   children: ReactNode
   className?: string
@@ -105,8 +184,14 @@ function RegisterFormSection({
 }
 
 export default function RegisterPage() {
-  const [jobTypes, setJobTypes] = useState<string[]>([])
-  const [jobTypeError, setJobTypeError] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [categories, setCategories] = useState<ServiceCategory[]>([])
+  const [categoriesLoading, setCategoriesLoading] = useState(true)
+  const [categoriesError, setCategoriesError] = useState<string | null>(null)
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([])
+  const [selectedSubcategoryIds, setSelectedSubcategoryIds] = useState<string[]>([])
+  const [categoryError, setCategoryError] = useState(false)
+  const [subcategoryError, setSubcategoryError] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [district, setDistrict] = useState("")
   const [workerKind, setWorkerKind] = useState<"individual" | "contractor">("individual")
@@ -115,22 +200,99 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
 
-  const toggleJobType = (value: string) => {
-    setJobTypes((prev) =>
-      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+  const availableSubcategories = useMemo(() => {
+    return categories
+      .filter((c) => selectedCategoryIds.includes(c.id))
+      .flatMap((c) =>
+        c.subcategories.map((s) => ({
+          ...s,
+          categoryName: c.name,
+        }))
+      )
+  }, [categories, selectedCategoryIds])
+
+  const toggleCategory = (categoryId: string) => {
+    setSelectedCategoryIds((prev) => {
+      if (prev.includes(categoryId)) {
+        const category = categories.find((c) => c.id === categoryId)
+        const subIds = new Set(category?.subcategories.map((s) => s.id) ?? [])
+        setSelectedSubcategoryIds((subs) => subs.filter((id) => !subIds.has(id)))
+        return prev.filter((id) => id !== categoryId)
+      }
+      return [...prev, categoryId]
+    })
+  }
+
+  const toggleSubcategory = (subcategoryId: string) => {
+    setSelectedSubcategoryIds((prev) =>
+      prev.includes(subcategoryId)
+        ? prev.filter((id) => id !== subcategoryId)
+        : [...prev, subcategoryId]
     )
   }
 
   useEffect(() => {
-    if (jobTypes.length > 0) setJobTypeError(false)
-  }, [jobTypes])
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadCategories() {
+      try {
+        setCategoriesLoading(true)
+        setCategoriesError(null)
+        const result = await getServiceCategories()
+        if (!cancelled) setCategories(result)
+      } catch (err) {
+        if (!cancelled) {
+          const message =
+            err instanceof Error ? err.message : "Could not load service categories."
+          setCategoriesError(message)
+          console.error(err)
+        }
+      } finally {
+        if (!cancelled) setCategoriesLoading(false)
+      }
+    }
+
+    loadCategories()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (selectedCategoryIds.length > 0) setCategoryError(false)
+  }, [selectedCategoryIds])
+
+  useEffect(() => {
+    if (selectedSubcategoryIds.length > 0) setSubcategoryError(false)
+  }, [selectedSubcategoryIds])
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const form = e.currentTarget
     setFormError(null)
-    if (jobTypes.length === 0) {
-      setJobTypeError(true)
+    if (categoriesLoading) {
+      setFormError("Service categories are still loading. Please wait.")
+      toast.error("Please wait for categories to load.")
+      return
+    }
+    if (categoriesError) {
+      setFormError(categoriesError)
+      toast.error("Could not load service categories.")
+      return
+    }
+    if (selectedCategoryIds.length === 0) {
+      setCategoryError(true)
+      return
+    }
+    const subcategoriesRequired = categories
+      .filter((c) => selectedCategoryIds.includes(c.id))
+      .some((c) => c.subcategories.length > 0)
+    if (subcategoriesRequired && selectedSubcategoryIds.length === 0) {
+      setSubcategoryError(true)
       return
     }
     if (!form.checkValidity()) {
@@ -149,14 +311,32 @@ export default function RegisterPage() {
     const lastName = String(fd.get("lastName") ?? "").trim()
     const phone = String(fd.get("phone") ?? "").trim()
     const emailRaw = String(fd.get("email") ?? "").trim()
+    const companyName = String(fd.get("companyName") ?? "").trim()
     const bio = String(fd.get("bio") ?? "").trim()
     const areasServedRaw = String(fd.get("areasServed") ?? "").trim()
     const experienceRaw = String(fd.get("experience") ?? "").trim()
-    const otherJobRaw = String(fd.get("otherJobType") ?? "").trim()
 
-    if (emailRaw && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailRaw)) {
+    if (!emailRaw) {
+      setFormError("Email is required to create your account.")
+      toast.error("Please enter your email.")
+      return
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailRaw)) {
       setFormError("Please enter a valid email address.")
       toast.error("Please enter a valid email address.")
+      return
+    }
+
+    if (workerKind === "individual" && (!firstName || !lastName)) {
+      setFormError("First name and last name are required for individual registration.")
+      toast.error("Please enter your first and last name.")
+      return
+    }
+
+    if (workerKind === "contractor" && !companyName) {
+      setFormError("Company name is required when registering as a company.")
+      toast.error("Please enter your company name.")
       return
     }
 
@@ -169,51 +349,46 @@ export default function RegisterPage() {
 
     setIsSubmitting(true)
     try {
-      const { error } = await submitWorkerApplication({
-        first_name: firstName,
-        last_name: lastName,
-        worker_kind: workerKind,
-        phone,
-        email: emailRaw ? normalizeEmail(emailRaw) : null,
-        job_types: jobTypes,
-        other_job_type: jobTypes.includes("other") ? otherJobRaw || null : null,
-        years_experience: yearsExperience,
-        district,
-        areas_served: areasServedRaw ? areasServedRaw : null,
-        services_offered: [],
-        subscription_plan: plan,
-        bio,
-        terms_accepted_at: new Date().toISOString(),
+      await registerWorker({
+        email: normalizeEmail(emailRaw),
+        worker_type: workerKindToType(workerKind),
+        first_name: workerKind === "individual" ? firstName : null,
+        last_name: workerKind === "individual" ? lastName : null,
+        company_name: workerKind === "contractor" ? companyName : null,
+        phone_number: phone,
+        years_of_experience: yearsExperience,
+        district: districtLabelForApi(district),
+        areas_served: areasServedRaw || null,
+        about: bio,
+        subscription_plan: planToSubscription(plan),
+        terms_accepted: true,
+        category_ids: selectedCategoryIds,
+        subcategory_ids: selectedSubcategoryIds,
       })
-
-      if (error) {
-        if (isUniqueViolation(error)) {
-          const msg =
-            "This email is already registered. Use a different email or contact support if you need help."
-          setFormError(msg)
-          toast.error("Email already registered.")
-        } else {
-          setFormError(error.message || "Could not submit your application.")
-          toast.error("Something went wrong. Please try again.")
-        }
-        return
-      }
 
       setSuccessOpen(true)
       form.reset()
-      setJobTypes([])
-      setJobTypeError(false)
+      setSelectedCategoryIds([])
+      setSelectedSubcategoryIds([])
+      setCategoryError(false)
+      setSubcategoryError(false)
       setDistrict("")
       setWorkerKind("individual")
       setPlan(DEFAULT_WORKER_PLAN)
       setAgreedToTerms(false)
     } catch (err) {
+      const raw =
+        err instanceof Error ? err.message : "Could not complete registration."
       const message =
-        err instanceof Error && err.message.includes("NEXT_PUBLIC_SUPABASE")
-          ? "Application form is not configured. Check environment variables."
-          : "Could not submit your application."
+        raw.includes("NEXT_PUBLIC_SUPABASE") || raw.includes("Missing NEXT_PUBLIC")
+          ? "Registration is not configured. Check environment variables."
+          : isDuplicateRegistrationError(raw)
+            ? "This email is already registered. Use a different email or contact support if you need help."
+            : raw
       setFormError(message)
-      toast.error(message)
+      toast.error(
+        isDuplicateRegistrationError(raw) ? "Email already registered." : message
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -222,12 +397,12 @@ export default function RegisterPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      <main className="flex-1 bg-secondary/30 py-12">
+      <main className="flex-1 py-12">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-6xl">
             <div className="mb-8 text-center">
               <h1 className="mb-2 text-3xl font-bold text-foreground md:text-4xl">
-                Become a Worker
+                Join as a Worker
               </h1>
               <p className="text-muted-foreground">
                 Join ZotServis and start getting more clients today
@@ -238,45 +413,18 @@ export default function RegisterPage() {
               {/* Form */}
               <div className="min-w-0 flex-1 lg:max-w-3xl">
                 <form
-                  className="rounded-2xl border border-border bg-card p-6 shadow-md ring-1 ring-black/[0.04] dark:ring-white/10 sm:p-8 lg:p-10"
+                  className="rounded-2xl border border-border bg-card p-6 shadow-md ring-1 ring-ocean/5 sm:p-8 lg:p-10"
                   onSubmit={handleSubmit}
                 >
                   <div className="space-y-6 md:space-y-8">
                     <RegisterFormSection
                       title="Personal information"
-                      description="How we’ll reach you and how you appear on your profile."
+                      description="How we will reach you and how you appear on your profile."
                     >
                       <div className="grid gap-5 sm:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label htmlFor="firstName" className="text-sm font-medium">
-                            First name *
-                          </Label>
-                          <Input
-                            id="firstName"
-                            name="firstName"
-                            className="h-11"
-                            autoComplete="given-name"
-                            placeholder="First name"
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="lastName" className="text-sm font-medium">
-                            Last name *
-                          </Label>
-                          <Input
-                            id="lastName"
-                            name="lastName"
-                            className="h-11"
-                            autoComplete="family-name"
-                            placeholder="Last name"
-                            required
-                          />
-                        </div>
-
                         <div className="space-y-3 sm:col-span-2">
                           <Label id="worker-kind-label" className="text-sm font-medium">
-                            Registering as *
+                            Registering as <RequiredStar />
                           </Label>
                           <RadioGroup
                             value={workerKind}
@@ -291,7 +439,7 @@ export default function RegisterPage() {
                               className={cn(
                                 "flex cursor-pointer gap-3 rounded-xl border p-4 transition-colors",
                                 workerKind === "individual"
-                                  ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                                  ? "border-teal bg-teal/5 ring-2 ring-teal/20"
                                   : "border-border bg-background hover:bg-muted/40"
                               )}
                             >
@@ -312,7 +460,7 @@ export default function RegisterPage() {
                               className={cn(
                                 "flex cursor-pointer gap-3 rounded-xl border p-4 transition-colors",
                                 workerKind === "contractor"
-                                  ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                                  ? "border-teal bg-teal/5 ring-2 ring-teal/20"
                                   : "border-border bg-background hover:bg-muted/40"
                               )}
                             >
@@ -322,7 +470,7 @@ export default function RegisterPage() {
                                 className="mt-0.5 shrink-0"
                               />
                               <div className="min-w-0">
-                                <span className="font-semibold text-foreground">Contractor / company</span>
+                                <span className="font-semibold text-foreground">Company</span>
                                 <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
                                   Business name, team, or company.
                                 </p>
@@ -331,9 +479,73 @@ export default function RegisterPage() {
                           </RadioGroup>
                         </div>
 
+                        <div
+                          className={cn(
+                            "space-y-2",
+                            workerKind !== "individual" && "hidden"
+                          )}
+                          aria-hidden={workerKind !== "individual"}
+                        >
+                          <Label htmlFor="firstName" className="text-sm font-medium">
+                            First name <RequiredStar />
+                          </Label>
+                          <Input
+                            id="firstName"
+                            name="firstName"
+                            className="h-11"
+                            autoComplete="given-name"
+                            placeholder="First name"
+                            required={workerKind === "individual"}
+                            disabled={workerKind !== "individual"}
+                            tabIndex={workerKind === "individual" ? 0 : -1}
+                          />
+                        </div>
+                        <div
+                          className={cn(
+                            "space-y-2",
+                            workerKind !== "individual" && "hidden"
+                          )}
+                          aria-hidden={workerKind !== "individual"}
+                        >
+                          <Label htmlFor="lastName" className="text-sm font-medium">
+                            Last name <RequiredStar />
+                          </Label>
+                          <Input
+                            id="lastName"
+                            name="lastName"
+                            className="h-11"
+                            autoComplete="family-name"
+                            placeholder="Last name"
+                            required={workerKind === "individual"}
+                            disabled={workerKind !== "individual"}
+                            tabIndex={workerKind === "individual" ? 0 : -1}
+                          />
+                        </div>
+                        <div
+                          className={cn(
+                            "space-y-2 sm:col-span-2",
+                            workerKind !== "contractor" && "hidden"
+                          )}
+                          aria-hidden={workerKind !== "contractor"}
+                        >
+                          <Label htmlFor="companyName" className="text-sm font-medium">
+                            Company name <RequiredStar />
+                          </Label>
+                          <Input
+                            id="companyName"
+                            name="companyName"
+                            className="h-11"
+                            autoComplete="organization"
+                            placeholder="Your business name"
+                            required={workerKind === "contractor"}
+                            disabled={workerKind !== "contractor"}
+                            tabIndex={workerKind === "contractor" ? 0 : -1}
+                          />
+                        </div>
+
                         <div className="space-y-2">
                           <Label htmlFor="phone" className="text-sm font-medium">
-                            Phone / WhatsApp *
+                            Phone / WhatsApp <RequiredStar />
                           </Label>
                           <Input
                             id="phone"
@@ -344,13 +556,10 @@ export default function RegisterPage() {
                             placeholder={PHONE_INPUT_PLACEHOLDER}
                             required
                           />
-                          <p className="text-xs leading-snug text-muted-foreground">
-                            Same number for calls and WhatsApp.
-                          </p>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="email" className="text-sm font-medium">
-                            Email
+                            Email <RequiredStar />
                           </Label>
                           <Input
                             id="email"
@@ -359,9 +568,10 @@ export default function RegisterPage() {
                             className="h-11"
                             autoComplete="email"
                             placeholder="your@email.com"
+                            required
                           />
                           <p className="text-xs leading-snug text-muted-foreground">
-                            Optional. If provided, used for your account — each email can register once.
+                            We&apos;ll email you a link to set your password. Each email can register once.
                           </p>
                         </div>
                       </div>
@@ -373,40 +583,86 @@ export default function RegisterPage() {
                     >
                       <div className="grid gap-5 sm:grid-cols-2">
                         <div className="space-y-2 sm:col-span-2">
-                          <Label id="job-types-label" className="text-sm font-medium">
-                            Job types *
+                          <Label id="categories-label" className="text-sm font-medium">
+                            Categories <RequiredStar />
                           </Label>
-                          <p className="text-xs text-muted-foreground">Select all that apply.</p>
-                          <ServiceTypePills
-                            selected={jobTypes}
-                            onToggle={toggleJobType}
-                            labelId="job-types-label"
-                          />
-                          {jobTypeError && (
+                          <p className="text-xs text-muted-foreground">
+                            Select the service categories you work in.
+                          </p>
+                          {categoriesLoading ? (
+                            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                              Loading categories…
+                            </p>
+                          ) : categoriesError ? (
                             <p className="text-sm text-destructive" role="alert">
-                              Select at least one job type.
+                              {categoriesError}
+                            </p>
+                          ) : categories.length === 0 ? (
+                            <p className="text-sm text-muted-foreground">
+                              No categories available. Please try again later.
+                            </p>
+                          ) : (
+                            <SelectionPills
+                              items={categories}
+                              selectedIds={selectedCategoryIds}
+                              onToggle={toggleCategory}
+                              labelId="categories-label"
+                            />
+                          )}
+                          {categoryError && (
+                            <p className="text-sm text-destructive" role="alert">
+                              Select at least one category.
                             </p>
                           )}
                         </div>
 
-                        {jobTypes.includes("other") && (
+                        {selectedCategoryIds.length > 0 && availableSubcategories.length > 0 && (
                           <div className="space-y-2 sm:col-span-2">
-                            <Label htmlFor="otherJobType" className="text-sm font-medium">
-                              Specify job type *
+                            <Label id="subcategories-label" className="text-sm font-medium">
+                              Subcategories <RequiredStar />
                             </Label>
-                            <Input
-                              id="otherJobType"
-                              name="otherJobType"
-                              className="h-11 max-w-xl"
-                              placeholder="Enter your profession"
-                              required
-                            />
+                            <p className="text-xs text-muted-foreground">
+                              Select the specific services you offer within your categories.
+                            </p>
+                            <div className="space-y-4">
+                              {categories
+                                .filter((c) => selectedCategoryIds.includes(c.id))
+                                .map((category) =>
+                                  category.subcategories.length > 0 ? (
+                                    <div key={category.id} className="space-y-2">
+                                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                        {category.name}
+                                      </p>
+                                      <SelectionPills
+                                        items={category.subcategories}
+                                        selectedIds={selectedSubcategoryIds}
+                                        onToggle={toggleSubcategory}
+                                        labelId="subcategories-label"
+                                      />
+                                    </div>
+                                  ) : null
+                                )}
+                            </div>
+                            {subcategoryError && (
+                              <p className="text-sm text-destructive" role="alert">
+                                Select at least one subcategory.
+                              </p>
+                            )}
                           </div>
                         )}
 
+                        {selectedCategoryIds.length > 0 &&
+                          availableSubcategories.length === 0 &&
+                          !categoriesLoading && (
+                            <p className="text-sm text-muted-foreground sm:col-span-2">
+                              No subcategories are available for your selected categories.
+                            </p>
+                          )}
+
                         <div className="space-y-2">
                           <Label htmlFor="experience" className="text-sm font-medium">
-                            Years of experience *
+                            Years of experience <RequiredStar />
                           </Label>
                           <Input
                             id="experience"
@@ -425,27 +681,36 @@ export default function RegisterPage() {
                               }
                             }}
                           />
-                          <p className="text-xs text-muted-foreground">Whole numbers only (no decimals).</p>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="location" className="text-sm font-medium">
-                            District *
+                            District <RequiredStar />
                           </Label>
-                          <Select value={district} onValueChange={setDistrict} required>
-                            <SelectTrigger
+                          {mounted ? (
+                            <Select value={district} onValueChange={setDistrict} required>
+                              <SelectTrigger
+                                id="location"
+                                className="!h-11 min-h-11 w-full py-0"
+                              >
+                                <SelectValue placeholder="Select your district" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {MAURITIUS_DISTRICTS.map((d) => (
+                                  <SelectItem key={d.value} value={d.value}>
+                                    {d.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <div
                               id="location"
-                              className="!h-11 min-h-11 w-full py-0"
+                              className="flex h-11 w-full items-center rounded-md border border-input bg-transparent px-3 text-sm text-muted-foreground shadow-xs"
+                              aria-hidden
                             >
-                              <SelectValue placeholder="Select your district" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {MAURITIUS_DISTRICTS.map((d) => (
-                                <SelectItem key={d.value} value={d.value}>
-                                  {d.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                              Select your district
+                            </div>
+                          )}
                         </div>
 
                         <div className="space-y-2 sm:col-span-2">
@@ -466,7 +731,11 @@ export default function RegisterPage() {
                     </RegisterFormSection>
 
                     <RegisterFormSection
-                      title="Subscription plan *"
+                      title={
+                        <>
+                          Subscription plan <RequiredStar />
+                        </>
+                      }
                       description="Choose how you want to be billed once your profile is approved."
                       headingId="subscription-plan-heading"
                     >
@@ -481,7 +750,7 @@ export default function RegisterPage() {
                           className={cn(
                             "flex h-full min-h-[7.5rem] cursor-pointer flex-col rounded-2xl border p-4 transition-colors sm:min-h-0",
                             plan === "monthly_100"
-                              ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                              ? "border-teal bg-teal/5 ring-2 ring-teal/20"
                               : "border-border bg-background hover:bg-muted/40"
                           )}
                         >
@@ -504,7 +773,7 @@ export default function RegisterPage() {
                           className={cn(
                             "flex h-full min-h-[7.5rem] cursor-pointer flex-col rounded-2xl border p-4 transition-colors sm:min-h-0",
                             plan === "yearly_1000"
-                              ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                              ? "border-teal bg-teal/5 ring-2 ring-teal/20"
                               : "border-border bg-background hover:bg-muted/40"
                           )}
                         >
@@ -533,7 +802,7 @@ export default function RegisterPage() {
                     <RegisterFormSection title="About you">
                       <div className="space-y-2">
                         <Label htmlFor="bio" className="text-sm font-medium">
-                          Short bio / description *
+                          Short bio / description <RequiredStar />
                         </Label>
                         <Textarea
                           id="bio"
@@ -552,7 +821,7 @@ export default function RegisterPage() {
                           id="terms"
                           checked={agreedToTerms}
                           onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
-                          className="mt-0.5 border-2 border-white bg-white text-primary shadow-sm ring-1 ring-black/10 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-primary focus-visible:border-white focus-visible:ring-2 focus-visible:ring-white/60 dark:ring-white/25"
+                          className="mt-0.5 border-teal data-[state=checked]:border-teal data-[state=checked]:bg-teal data-[state=checked]:text-white"
                         />
                         <Label htmlFor="terms" className="cursor-pointer text-sm leading-relaxed text-muted-foreground">
                           I agree to the{" "}
@@ -560,7 +829,7 @@ export default function RegisterPage() {
                             href="/terms"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="font-medium text-primary underline underline-offset-2"
+                            className="font-medium text-teal underline underline-offset-2"
                           >
                             Terms of Service
                           </Link>{" "}
@@ -569,7 +838,7 @@ export default function RegisterPage() {
                             href="/privacy"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="font-medium text-primary underline underline-offset-2"
+                            className="font-medium text-teal underline underline-offset-2"
                           >
                             Privacy Policy
                           </Link>
@@ -587,8 +856,10 @@ export default function RegisterPage() {
                     <Button
                       type="submit"
                       size="lg"
-                      className="h-12 w-full text-base bg-accent text-accent-foreground hover:bg-accent/90"
-                      disabled={!agreedToTerms || isSubmitting}
+                      className="h-12 w-full text-base shadow-none focus-visible:ring-ocean/25"
+                      disabled={
+                        !agreedToTerms || isSubmitting || categoriesLoading || !!categoriesError
+                      }
                     >
                       {isSubmitting ? "Submitting…" : "Register as a worker"}
                     </Button>
@@ -609,8 +880,8 @@ export default function RegisterPage() {
                   <div className="space-y-6">
                     {benefits.map((benefit) => (
                       <div key={benefit.title} className="flex gap-4">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                          <benefit.icon className="h-5 w-5 text-primary" />
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal/10">
+                          <benefit.icon className="h-5 w-5 text-teal" />
                         </div>
                         <div>
                           <h4 className="font-medium text-foreground">{benefit.title}</h4>
@@ -654,23 +925,27 @@ export default function RegisterPage() {
       </main>
       <Footer />
 
-      <Toaster richColors position="top-center" />
-
       <Dialog open={successOpen} onOpenChange={setSuccessOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader className="items-center text-center sm:items-center sm:text-center">
-            <div className="mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-accent/15">
-              <CheckCircle2 className="h-8 w-8 text-accent" aria-hidden />
+            <div className="mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-teal/15">
+              <CheckCircle2 className="h-8 w-8 text-teal" aria-hidden />
             </div>
-            <DialogTitle>Your application has been submitted</DialogTitle>
+            <DialogTitle>Registration complete</DialogTitle>
             <DialogDescription className="space-y-3 pt-1 text-base leading-relaxed" asChild>
               <div>
                 <p className="text-muted-foreground">
-                  An administrator will contact you to validate your subscription and complete the next steps.
+                  Your worker account has been created. Check your email for an invite link to set your
+                  password, then{" "}
+                  <Link href={AUTH_PATHS.login} className="font-medium text-teal hover:underline">
+                    log in
+                  </Link>{" "}
+                  to manage your profile.
                 </p>
                 <p className="text-foreground/90">
-                  This process can take up to{" "}
-                  <strong className="font-semibold text-foreground">24 hours</strong>.
+                  Your profile is pending verification. An administrator may contact you within{" "}
+                  <strong className="font-semibold text-foreground">24 hours</strong> to complete
+                  onboarding.
                 </p>
               </div>
             </DialogDescription>

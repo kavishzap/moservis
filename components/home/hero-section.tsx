@@ -1,196 +1,240 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, MapPin, Search, Zap, Droplets, Sparkles, Paintbrush, Hammer } from "lucide-react"
+import { MapPin } from "lucide-react"
+import { goldButtonClassName } from "@/lib/brand-buttons"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { CategorySubcategoryFilters } from "@/components/search/category-filter-selects"
+import { heroSearchSelectTriggerClassName } from "@/components/service-type-select"
 import { MAURITIUS_DISTRICTS } from "@/lib/search-options"
-import {
-  ServiceTypeSelect,
-  heroSearchSelectTriggerClassName,
-} from "@/components/service-type-select"
+import { ALL_DISTRICTS, buildSearchHref } from "@/lib/search-url"
+import { heroContainer } from "@/lib/site-layout"
+import { getServiceCategories, type ServiceCategory } from "@/services/categoryService"
 
-const quickCategories = [
-  { icon: Zap, label: "Electrician", href: "/search?category=electrician" },
-  { icon: Droplets, label: "Plumber", href: "/search?category=plumber" },
-  { icon: Sparkles, label: "Cleaner", href: "/search?category=cleaner" },
-  { icon: Paintbrush, label: "Painter", href: "/search?category=painter" },
-  { icon: Hammer, label: "Carpenter", href: "/search?category=carpenter" },
-]
+function HeroCopyCard({ className }: { className?: string }) {
+  return (
+    <div className={className}>
+      <h1 className="text-balance text-xl font-bold leading-[1.12] tracking-tight text-ocean sm:text-2xl lg:text-[2.125rem] xl:text-[2.375rem]">
+        ZotServis Community: Where Locals Help Locals
+      </h1>
+      <p className="mt-3 text-pretty text-base leading-relaxed text-slate/90 sm:mt-3.5 lg:text-[1.0625rem]">
+        Connect with trusted workers for your home needs in Mauritius. Find electricians,
+        plumbers, gardeners, and more in a supportive local network.
+      </p>
+    </div>
+  )
+}
+
+function HeroSearchBar({
+  categories,
+  categoriesLoading,
+  selectedCategoryIds,
+  selectedSubcategoryIds,
+  onCategorySelect,
+  onSubcategorySelect,
+  onToggleCategory,
+  onToggleSubcategory,
+  district,
+  setDistrict,
+  searchHref,
+}: {
+  categories: ServiceCategory[]
+  categoriesLoading: boolean
+  selectedCategoryIds: string[]
+  selectedSubcategoryIds: string[]
+  onCategorySelect: (categoryId: string | null) => void
+  onSubcategorySelect: (subcategoryId: string | null) => void
+  onToggleCategory: (id: string) => void
+  onToggleSubcategory: (id: string) => void
+  district: string
+  setDistrict: (v: string) => void
+  searchHref: string
+}) {
+  return (
+    <div className="hero-search-shell mx-auto flex w-full max-w-[42rem] flex-col gap-3 rounded-2xl border-[3px] border-white bg-ocean p-4 sm:max-w-[44rem] sm:flex-row sm:items-center sm:gap-3 md:max-w-[min(100%,64rem)] md:p-4 lg:p-5">
+      <CategorySubcategoryFilters
+        variant="hero"
+        categories={categories}
+        selectedCategoryIds={selectedCategoryIds}
+        selectedSubcategoryIds={selectedSubcategoryIds}
+        onToggleCategory={onToggleCategory}
+        onToggleSubcategory={onToggleSubcategory}
+        onCategorySelect={onCategorySelect}
+        onSubcategorySelect={onSubcategorySelect}
+        loading={categoriesLoading}
+        className="md:min-w-0 md:flex-[2]"
+      />
+
+      <div className="relative min-w-0 flex-1 md:max-w-[13rem] lg:max-w-[15rem]">
+        <MapPin
+          className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-4 w-4 -translate-y-1/2 text-white/80"
+          aria-hidden
+        />
+        <Select value={district} onValueChange={setDistrict}>
+          <SelectTrigger
+            className={cn(heroSearchSelectTriggerClassName, "pl-10")}
+          >
+            <SelectValue placeholder="Select district" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL_DISTRICTS}>Select district</SelectItem>
+            {MAURITIUS_DISTRICTS.map((d) => (
+              <SelectItem key={d.value} value={d.value}>
+                {d.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div
+        className="hidden h-12 w-px shrink-0 bg-white/35 sm:h-[3.25rem] sm:mx-2 sm:block lg:mx-3"
+        aria-hidden
+      />
+
+      <Button
+        asChild
+        className={cn(
+          goldButtonClassName,
+          "h-12 w-full shrink-0 rounded-full text-sm sm:h-[3.25rem] sm:text-base md:min-w-[10.5rem] lg:min-w-[11.5rem]"
+        )}
+      >
+        <Link href={searchHref} className="w-full shrink-0 md:w-auto">
+          Find workers
+        </Link>
+      </Button>
+    </div>
+  )
+}
 
 export function HeroSection() {
-  const [category, setCategory] = useState("all")
-  const [district, setDistrict] = useState("all")
+  const [categories, setCategories] = useState<ServiceCategory[]>([])
+  const [categoriesLoading, setCategoriesLoading] = useState(true)
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([])
+  const [selectedSubcategoryIds, setSelectedSubcategoryIds] = useState<string[]>([])
+  const [district, setDistrict] = useState(ALL_DISTRICTS)
 
-  const searchHref = useMemo(() => {
-    const params = new URLSearchParams()
-    if (category !== "all") params.set("category", category)
-    if (district !== "all") params.set("location", district)
-    const q = params.toString()
-    return q ? `/search?${q}` : "/search"
-  }, [category, district])
+  const setCategory = (categoryId: string | null) => {
+    setSelectedCategoryIds(categoryId ? [categoryId] : [])
+    setSelectedSubcategoryIds([])
+  }
+
+  const setSubcategory = (subcategoryId: string | null) => {
+    setSelectedSubcategoryIds(subcategoryId ? [subcategoryId] : [])
+  }
+
+  const toggleCategory = (categoryId: string) => {
+    setSelectedCategoryIds((prev) => {
+      if (prev.includes(categoryId)) {
+        const category = categories.find((c) => c.id === categoryId)
+        const subIds = new Set(category?.subcategories.map((s) => s.id) ?? [])
+        setSelectedSubcategoryIds((subs) => subs.filter((id) => !subIds.has(id)))
+        return prev.filter((id) => id !== categoryId)
+      }
+      return [...prev, categoryId]
+    })
+  }
+
+  const toggleSubcategory = (subcategoryId: string) => {
+    setSelectedSubcategoryIds((prev) =>
+      prev.includes(subcategoryId)
+        ? prev.filter((id) => id !== subcategoryId)
+        : [...prev, subcategoryId]
+    )
+  }
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function load() {
+      try {
+        setCategoriesLoading(true)
+        const result = await getServiceCategories()
+        if (!cancelled) setCategories(result)
+      } catch (err) {
+        console.error("Hero categories:", err)
+      } finally {
+        if (!cancelled) setCategoriesLoading(false)
+      }
+    }
+
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const searchHref = useMemo(
+    () =>
+      buildSearchHref({
+        categoryIds: selectedCategoryIds,
+        subcategoryIds: selectedSubcategoryIds,
+        district,
+      }),
+    [selectedCategoryIds, selectedSubcategoryIds, district]
+  )
+
+  const searchProps = {
+    categories,
+    categoriesLoading,
+    selectedCategoryIds,
+    selectedSubcategoryIds,
+    onCategorySelect: setCategory,
+    onSubcategorySelect: setSubcategory,
+    onToggleCategory: toggleCategory,
+    onToggleSubcategory: toggleSubcategory,
+    district,
+    setDistrict,
+    searchHref,
+  }
 
   return (
-    <section className="relative isolate flex min-h-svh flex-col overflow-hidden pb-20 pt-[4.5rem] md:-mt-16 md:min-h-svh md:pb-28 md:pt-32">
-      <div className="pointer-events-none absolute inset-0 -z-20 min-h-full w-full">
-        <div className="relative h-full min-h-full w-full">
-          <Image
-            src="/workersbackground.png"
-            alt=""
-            fill
-            priority
-            className="object-cover object-center"
-            sizes="100vw"
-          />
-        </div>
-      </div>
-      {/* Even vignette so centered type stays legible on the photo */}
-      <div
-        className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-black/70 via-black/48 to-black/72"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_85%_65%_at_50%_38%,transparent_0%,rgba(0,0,0,0.55)_72%,rgba(0,0,0,0.85)_100%)]"
-        aria-hidden
-      />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-t from-black to-transparent md:h-40" aria-hidden />
+    <section className="relative">
+      <div className={`${heroContainer} relative pb-8 pt-1 sm:pb-10 sm:pt-1.5 md:pb-10`}>
+        <div className="overflow-hidden rounded-[2.75rem] bg-card ring-1 ring-black/[0.06] sm:rounded-[3.5rem] lg:rounded-[4.5rem] xl:rounded-[5.5rem]">
+          <div className="relative min-h-[min(68dvh,36rem)] w-full sm:min-h-[min(72dvh,40rem)] md:min-h-[calc(100dvh-7.25rem)] md:max-h-[min(920px,calc(100dvh-5.5rem))]">
+            <Image
+              src="/zotservisportrait.png"
+              alt="Families and local workers together in Mauritius"
+              fill
+              priority
+              className="object-cover object-center md:hidden"
+              sizes="100vw"
+            />
+            <Image
+              src="/zotservislandscape.png"
+              alt="Families and local workers together in Mauritius"
+              fill
+              priority
+              className="hidden object-cover object-[center_28%] md:block"
+              sizes="(min-width: 768px) 92rem"
+            />
+            <div
+              className="pointer-events-none absolute inset-0 bg-gradient-to-bl from-ocean/55 via-ocean/22 via-45% to-transparent"
+              aria-hidden
+            />
+            <div
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-ocean/30 to-transparent md:hidden"
+              aria-hidden
+            />
 
-      <div className="container relative z-0 mx-auto flex flex-1 flex-col justify-start pt-2 md:justify-center md:pt-0 px-4 sm:px-6 md:px-8 lg:px-10">
-        <div className="mx-auto flex w-full max-w-3xl flex-col items-center justify-center text-center max-md:px-1">
-          <div
-            className="hero-animate-in mb-7 inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/[0.09] py-1.5 pl-2 pr-5 shadow-lg shadow-black/20 backdrop-blur-md"
-            style={{ animationDelay: "0ms" }}
-          >
-            <span className="relative flex h-2.5 w-2.5 shrink-0">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/60 opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary" />
-            </span>
-            <span className="text-sm font-medium tracking-wide text-white/95">
-              Launching 11th April 2026
-            </span>
+            <div className="absolute inset-y-0 right-0 z-10 hidden w-[min(50%,24rem)] items-start justify-center p-5 pt-8 md:flex md:pt-10 lg:w-[min(48%,30rem)] lg:p-8 lg:pt-14 xl:w-[32rem] xl:pt-16">
+              <div className="w-full rounded-2xl border border-[#e5dcc8] bg-sand p-7 lg:rounded-3xl lg:p-9 xl:p-10">
+                <HeroCopyCard />
+              </div>
+            </div>
+
+            <div className="absolute inset-x-0 bottom-6 z-20 flex justify-center px-4 pt-16 sm:bottom-8 sm:px-5 md:bottom-10 md:px-8 lg:bottom-12 lg:px-10 xl:bottom-14">
+              <HeroSearchBar {...searchProps} />
+            </div>
           </div>
 
-          <h1
-            className="hero-animate-in mb-5 w-full max-w-[22ch] text-balance text-center text-4xl font-bold leading-[1.08] tracking-tight text-white max-md:mx-auto sm:max-w-3xl sm:text-5xl lg:text-6xl lg:leading-[1.05]"
-            style={{ animationDelay: "80ms" }}
-          >
-            <span className="block">Find trusted workers</span>
-            <span className="mt-1 block text-gradient-neon">near you.</span>
-          </h1>
-          <p
-            className="hero-animate-in mb-10 w-full max-w-xl text-pretty text-center text-base leading-relaxed text-white/80 max-md:mx-auto sm:text-lg"
-            style={{ animationDelay: "160ms" }}
-          >
-            Electricians, plumbers, cleaners, gardeners and more across Mauritius — a simple way to
-            find trusted local workers when you need them.
-          </p>
-
-          <div
-            className="hero-animate-in mb-10 w-full max-w-2xl max-md:mx-auto"
-            style={{ animationDelay: "240ms" }}
-          >
-            <div className="hero-gradient-border rounded-[1.35rem] p-px transition-transform duration-500 ease-out md:rounded-full md:hover:scale-[1.008]">
-              <div className="hero-search-shell flex flex-col gap-4 rounded-[1.3rem] bg-zinc-950/50 p-3.5 backdrop-blur-2xl md:flex-row md:items-center md:gap-4 md:rounded-full md:p-1.5 md:pl-3 md:pr-2">
-                <div className="relative min-w-0 flex-1 md:min-w-[10rem] md:flex-[1.1]">
-                  <Search className="pointer-events-none absolute left-3.5 top-1/2 z-10 h-[1.125rem] w-[1.125rem] -translate-y-1/2 text-primary/90" />
-                  <ServiceTypeSelect
-                    variant="hero"
-                    value={category}
-                    onValueChange={setCategory}
-                    placeholder="Services you need?"
-                    allOption={{ value: "all", label: "Services you need?" }}
-                  />
-                </div>
-                <div
-                  className="hidden h-8 w-px shrink-0 self-center bg-gradient-to-b from-transparent via-white/20 to-transparent md:mx-1 md:block"
-                  aria-hidden
-                />
-                <div className="relative min-w-0 flex-1 md:min-w-[10rem] md:flex-[1.1]">
-                  <MapPin className="pointer-events-none absolute left-3.5 top-1/2 z-10 h-[1.125rem] w-[1.125rem] -translate-y-1/2 text-primary/90" />
-                  <Select value={district} onValueChange={setDistrict}>
-                    <SelectTrigger className={heroSearchSelectTriggerClassName}>
-                      <SelectValue placeholder="Select district" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Select district</SelectItem>
-                      {MAURITIUS_DISTRICTS.map((d) => (
-                        <SelectItem key={d.value} value={d.value}>
-                          {d.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Link href={searchHref} className="w-full shrink-0 md:w-auto md:pl-1">
-                  <Button
-                    size="sm"
-                    className="group/btn h-10 w-full gap-1.5 rounded-full px-6 text-sm font-semibold shadow-[0_0_28px_rgba(245,158,11,0.28)] transition-[box-shadow,transform] duration-300 hover:shadow-[0_0_36px_rgba(245,158,11,0.38)] active:scale-[0.98] md:w-auto"
-                  >
-                    Find workers
-                    <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/btn:translate-x-0.5" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-            <p className="mt-5 text-center text-xs leading-relaxed text-white/45 md:mt-3">
-              No account needed to browse — contact pros directly.
-            </p>
-          </div>
-
-          <div
-            className="hero-animate-in flex w-full max-w-2xl flex-col items-center gap-3 max-md:mx-auto"
-            style={{ animationDelay: "320ms" }}
-          >
-            <span className="text-center text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-white/50">
-              Popular right now
-            </span>
-            {/* Mobile: 3 + 2 grid, centered; md+: single wrapped row */}
-            <div className="hidden w-full max-w-xs flex-col items-center gap-2 md:flex md:max-w-2xl md:flex-row md:flex-wrap md:justify-center">
-              {quickCategories.map((categoryItem) => (
-                <Link key={categoryItem.label} href={categoryItem.href} className="shrink-0">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-9 gap-2 rounded-full border-white/15 bg-white/[0.06] px-3.5 text-xs font-medium text-white/95 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/45 hover:bg-primary/15 hover:text-white hover:shadow-[0_12px_40px_-12px_rgba(245,158,11,0.32)] sm:h-10 sm:px-4 sm:text-sm"
-                  >
-                    <categoryItem.icon className="h-3.5 w-3.5 text-primary/90 sm:h-4 sm:w-4" />
-                    {categoryItem.label}
-                  </Button>
-                </Link>
-              ))}
-            </div>
-            <div className="flex w-full max-w-xs flex-col items-center gap-2 md:hidden">
-              <div className="grid w-full grid-cols-3 gap-2">
-                {quickCategories.slice(0, 3).map((categoryItem) => (
-                  <Link key={categoryItem.label} href={categoryItem.href} className="min-w-0">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-9 w-full gap-1 rounded-full border-white/15 bg-white/[0.06] px-2 text-[0.7rem] font-medium text-white/95 backdrop-blur-sm transition-all duration-300 hover:border-primary/45 hover:bg-primary/15 hover:text-white hover:shadow-[0_12px_40px_-12px_rgba(245,158,11,0.32)]"
-                    >
-                      <categoryItem.icon className="h-3 w-3 shrink-0 text-primary/90" />
-                      <span className="truncate">{categoryItem.label}</span>
-                    </Button>
-                  </Link>
-                ))}
-              </div>
-              <div className="flex w-2/3 min-w-0 justify-center gap-2">
-                {quickCategories.slice(3).map((categoryItem) => (
-                  <Link key={categoryItem.label} href={categoryItem.href} className="min-w-0 flex-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-9 w-full gap-1 rounded-full border-white/15 bg-white/[0.06] px-2 text-[0.7rem] font-medium text-white/95 backdrop-blur-sm transition-all duration-300 hover:border-primary/45 hover:bg-primary/15 hover:text-white hover:shadow-[0_12px_40px_-12px_rgba(245,158,11,0.32)]"
-                    >
-                      <categoryItem.icon className="h-3 w-3 shrink-0 text-primary/90" />
-                      <span className="truncate">{categoryItem.label}</span>
-                    </Button>
-                  </Link>
-                ))}
-              </div>
-            </div>
+          <div className="border-t border-[#e5dcc8] bg-sand px-6 py-6 md:hidden">
+            <HeroCopyCard />
           </div>
         </div>
       </div>

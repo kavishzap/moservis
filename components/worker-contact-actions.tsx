@@ -19,6 +19,7 @@ import {
   defaultWhatsAppMessage,
   toInternationalDigits,
 } from "@/lib/contact"
+import { cn } from "@/lib/utils"
 
 type WorkerContactActionsProps = {
   phone: string
@@ -67,12 +68,7 @@ export function WorkerContactActions({
             : `flex flex-wrap gap-2 ${className ?? ""}`
         }
       >
-        <Button
-          size="sm"
-          className={`gap-2 bg-primary text-primary-foreground hover:bg-primary/90 ${btnClass}`}
-          disabled={!canContact}
-          asChild={canContact}
-        >
+        <Button size="sm" className={cn("gap-2", btnClass)} disabled={!canContact} asChild={canContact}>
           {canContact ? (
             <a href={telHref}>
               <Phone className="h-4 w-4" />
@@ -89,7 +85,7 @@ export function WorkerContactActions({
           type="button"
           size="sm"
           variant="outline"
-          className={`gap-2 border-accent text-accent hover:bg-accent/10 ${btnClass}`}
+          className={`gap-2 border-accent text-accent hover:border-ocean hover:bg-ocean hover:text-white ${btnClass}`}
           disabled={!canContact}
           onClick={() => setWhatsappOpen(true)}
         >

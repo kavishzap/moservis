@@ -1,28 +1,18 @@
-import { createClient } from "@supabase/supabase-js"
-import { mapRowToWorker, type Worker, type WorkerApplicationRow } from "@/lib/worker-map"
+import { mapWorkerListItemToWorker, type Worker } from "@/lib/worker-map"
+import { getWorkers } from "@/services/workerService"
 
-export async function fetchActiveWorkers(): Promise<Worker[]> {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!url || !key) {
-    console.warn("fetchActiveWorkers: missing Supabase env")
-    return []
-  }
-
-  const supabase = createClient(url, key)
-  const { data, error } = await supabase
-    .from("worker_applications")
-    .select(
-      "id, first_name, last_name, worker_kind, phone, email, job_types, other_job_type, years_experience, district, areas_served, services_offered, subscription_plan, bio, profile_status"
+/** Fetches verified workers via the `get-workers` edge function. */
+export async function fetchWorkers(
+  payload: Parameters<typeof getWorkers>[0] = { page: 1, limit: 50 }
+): Promise<Worker[]> {
+  try {
+    const result = await getWorkers(payload)
+    return result.workers.map(mapWorkerListItemToWorker)
+  } catch (err) {
+    console.error(
+      "fetchWorkers:",
+      err instanceof Error ? err.message : "Failed to load workers"
     )
-    .eq("profile_status", "active")
-    .order("created_at", { ascending: false })
-
-  if (error) {
-    console.error("fetchActiveWorkers:", error.message)
     return []
   }
-
-  const rows = (data ?? []) as WorkerApplicationRow[]
-  return rows.map(mapRowToWorker)
 }

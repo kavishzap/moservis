@@ -1,134 +1,277 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
-import { useSearchParams } from "next/navigation"
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Loader2, X } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import type { Worker } from "@/lib/worker-map"
-import { workerMatchesFilters } from "@/lib/worker-map"
-import { parseSearchUrlParams } from "@/lib/search-url"
+import { buildWorkersSearchPayload, mapWorkerListItemToWorker } from "@/lib/worker-map"
+import { buildSearchHref, parseSearchUrlParams, ALL_DISTRICTS } from "@/lib/search-url"
 import {
   SearchFiltersMobile,
   SearchFiltersProvider,
   SearchFiltersSidebar,
   useSearchFilters,
 } from "@/components/search/search-filters"
+import { SearchBar } from "@/components/search/search-bar"
 import { WorkerCard } from "@/components/search/worker-card"
-import { Button } from "@/components/ui/button"
+import {
+  DEFAULT_PAGE_SIZE,
+  SearchPagination,
+  SearchPaginationNav,
+  SearchResultsSummary,
+} from "@/components/search/search-pagination"
+import { getWorkers } from "@/services/workerService"
+import { siteContainer } from "@/lib/site-layout"
 
-const PAGE_SIZE = 10
+const SEARCH_DEBOUNCE_MS = 350
 
-function SearchResultsInner({ workers }: { workers: Worker[] }) {
-  const { selectedDistrict, selectedJobTypes } = useSearchFilters()
+function SearchResultsInner() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const {
+    selectedDistrict,
+    selectedJobTypes,
+    selectedCategoryIds,
+    selectedSubcategoryIds,
+    searchQuery,
+    categories,
+    selectedMinRating,
+    verifiedOnly,
+    clearFilters,
+  } = useSearchFilters()
+
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery.trim())
+  const [workers, setWorkers] = useState<Worker[]>([])
   const [page, setPage] = useState(1)
-
-  const filtered = useMemo(
-    () =>
-      workers.filter((w) => workerMatchesFilters(w, selectedDistrict, selectedJobTypes)),
-    [workers, selectedDistrict, selectedJobTypes]
-  )
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const safePage = Math.min(page, totalPages)
-  const start = (safePage - 1) * PAGE_SIZE
-  const pageWorkers = filtered.slice(start, start + PAGE_SIZE)
-  const rangeEnd = filtered.length === 0 ? 0 : Math.min(start + PAGE_SIZE, filtered.length)
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE)
+  const [totalItems, setTotalItems] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const skipUrlSyncRef = useRef(true)
+  const queryPageRef = useRef(1)
 
   useEffect(() => {
+    queryPageRef.current = page
+  }, [page])
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery.trim())
+    }, SEARCH_DEBOUNCE_MS)
+
+    return () => window.clearTimeout(timer)
+  }, [searchQuery])
+
+  useLayoutEffect(() => {
+    queryPageRef.current = 1
     setPage(1)
-  }, [selectedDistrict, selectedJobTypes])
+  }, [
+    selectedDistrict,
+    selectedJobTypes,
+    debouncedSearchQuery,
+    selectedCategoryIds,
+    selectedSubcategoryIds,
+    selectedMinRating,
+    verifiedOnly,
+    pageSize,
+  ])
+
+  useEffect(() => {
+    const href = buildSearchHref({
+      district: selectedDistrict,
+      categoryIds: selectedCategoryIds,
+      subcategoryIds: selectedSubcategoryIds,
+      jobTypes: selectedJobTypes,
+      q: debouncedSearchQuery,
+      minRating: selectedMinRating,
+      verifiedOnly,
+    })
+
+    const currentQs = searchParams.toString()
+    const currentHref = currentQs ? `/worker?${currentQs}` : "/worker"
+
+    if (skipUrlSyncRef.current) {
+      skipUrlSyncRef.current = false
+      return
+    }
+
+    if (href !== currentHref) {
+      router.replace(href, { scroll: false })
+    }
+  }, [
+    debouncedSearchQuery,
+    router,
+    searchParams,
+    selectedCategoryIds,
+    selectedDistrict,
+    selectedJobTypes,
+    selectedSubcategoryIds,
+    selectedMinRating,
+    verifiedOnly,
+  ])
+
+  const loadWorkers = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const payload = buildWorkersSearchPayload({
+        page: queryPageRef.current,
+        limit: pageSize,
+        searchQuery: debouncedSearchQuery,
+        district: selectedDistrict,
+        categoryIds: selectedCategoryIds,
+        subcategoryIds: selectedSubcategoryIds,
+        jobTypes: selectedJobTypes,
+        categories,
+        minRating: selectedMinRating,
+        verifiedOnly,
+      })
+
+      const result = await getWorkers(payload)
+      setWorkers(result.workers.map(mapWorkerListItemToWorker))
+      setTotalItems(result.pagination.total)
+      setTotalPages(Math.max(1, result.pagination.total_pages))
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Could not load workers."
+      setError(message)
+      setWorkers([])
+      setTotalItems(0)
+      setTotalPages(1)
+    } finally {
+      setLoading(false)
+    }
+  }, [
+    page,
+    pageSize,
+    debouncedSearchQuery,
+    selectedDistrict,
+    selectedCategoryIds,
+    selectedSubcategoryIds,
+    selectedJobTypes,
+    categories,
+    selectedMinRating,
+    verifiedOnly,
+  ])
+
+  useEffect(() => {
+    void loadWorkers()
+  }, [loadWorkers])
 
   useEffect(() => {
     if (page > totalPages) setPage(totalPages)
   }, [page, totalPages])
+
+  const safePage = Math.min(page, totalPages)
+  const rangeStart = totalItems === 0 ? 0 : (safePage - 1) * pageSize + 1
+  const rangeEnd = totalItems === 0 ? 0 : Math.min(safePage * pageSize, totalItems)
+
+  const hasActiveFilters =
+    debouncedSearchQuery.length > 0 ||
+    selectedDistrict !== ALL_DISTRICTS ||
+    selectedCategoryIds.length > 0 ||
+    selectedSubcategoryIds.length > 0 ||
+    selectedJobTypes.length > 0 ||
+    selectedMinRating != null ||
+    verifiedOnly
+
+  const handleClearFilters = () => {
+    clearFilters()
+    setDebouncedSearchQuery("")
+    router.replace("/worker", { scroll: false })
+  }
 
   const goToPage = (next: number) => {
     setPage(next)
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size)
+  }
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex gap-8">
+    <div className={`${siteContainer} py-6 sm:py-8`}>
+      <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
         <SearchFiltersSidebar />
 
-        <div className="min-w-0 flex-1">
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-            <p className="text-muted-foreground">
-              {filtered.length > 0 ? (
-                <>
-                  Showing{" "}
-                  <span className="font-medium text-foreground">
-                    {start + 1}–{rangeEnd}
-                  </span>{" "}
-                  of{" "}
-                  <span className="font-medium text-foreground">{filtered.length}</span>
-                  {filtered.length === 1 ? " worker" : " workers"}
-                </>
-              ) : (
-                <>
-                  <span className="font-medium text-foreground">0</span> workers
-                </>
-              )}
-              {workers.length !== filtered.length && filtered.length > 0 && (
-                <span className="text-muted-foreground">
-                  {" "}
-                  (of {workers.length} active)
-                </span>
-              )}
-            </p>
+        <div className="min-w-0 flex-1 lg:min-w-0">
+          <div className="mb-6 flex min-w-0 items-center gap-2 sm:gap-3">
+            <SearchResultsSummary
+              rangeStart={rangeStart}
+              rangeEnd={rangeEnd}
+              totalItems={totalItems}
+              workersTotal={totalItems}
+              filteredFromTotal={false}
+              className="text-xs sm:text-sm"
+            />
+            {totalItems > 0 && !loading && totalPages > 1 && (
+              <SearchPaginationNav
+                page={safePage}
+                totalPages={totalPages}
+                onPageChange={goToPage}
+                showPageNumbers={false}
+                className="hidden shrink-0 md:flex"
+              />
+            )}
+            <SearchBar className="min-w-0 flex-1 basis-0" />
             <SearchFiltersMobile />
           </div>
 
-          {filtered.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-primary/30 bg-muted/30 px-6 py-12 text-center">
+          {loading ? (
+            <div className="flex items-center justify-center gap-2 rounded-2xl border border-dashed border-teal/30 bg-muted/30 px-6 py-16 text-muted-foreground">
+              <Loader2 className="h-5 w-5 animate-spin text-teal" aria-hidden />
+              Loading workers…
+            </div>
+          ) : error ? (
+            <div className="rounded-2xl border border-destructive/30 bg-destructive/5 px-6 py-12 text-center">
+              <p className="font-medium text-foreground">Could not load workers</p>
+              <p className="mt-2 text-sm text-muted-foreground">{error}</p>
+            </div>
+          ) : workers.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-teal/30 bg-muted/30 px-6 py-12 text-center">
               <p className="font-medium text-foreground">
-                {workers.length === 0
-                  ? "No active workers listed yet"
-                  : "No workers match your filters"}
+                {hasActiveFilters ? "No workers match your search" : "No workers found"}
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
-                {workers.length === 0
-                  ? "Launching on 11th April 2026"
-                  : "Try another district or job type, or clear filters to see everyone."}
+                {hasActiveFilters
+                  ? "Try a different search term, category, district, rating, verification, or clear filters."
+                  : "Check back soon — new workers join ZotServis regularly."}
               </p>
+              {hasActiveFilters ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleClearFilters}
+                  className="mt-6 rounded-full border-teal/35 font-semibold"
+                >
+                  <X className="mr-2 h-4 w-4 shrink-0" aria-hidden />
+                  Clear filters
+                </Button>
+              ) : null}
             </div>
           ) : (
             <>
               <div className="space-y-4">
-                {pageWorkers.map((worker) => (
+                {workers.map((worker) => (
                   <WorkerCard key={worker.id} worker={worker} />
                 ))}
               </div>
 
-              {totalPages > 1 && (
-                <div className="mt-8 flex flex-col items-stretch gap-4 border-t border-primary/20 pt-6 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-center text-sm text-muted-foreground sm:text-left">
-                    Page <span className="font-medium text-foreground">{safePage}</span> of{" "}
-                    <span className="font-medium text-foreground">{totalPages}</span>
-                  </p>
-                  <div className="flex items-center justify-center gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="rounded-full border-primary/35"
-                      disabled={safePage <= 1}
-                      onClick={() => goToPage(safePage - 1)}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="rounded-full border-primary/35"
-                      disabled={safePage >= totalPages}
-                      onClick={() => goToPage(safePage + 1)}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <SearchPagination
+                page={safePage}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                totalItems={totalItems}
+                rangeStart={rangeStart}
+                rangeEnd={rangeEnd}
+                onPageChange={goToPage}
+                onPageSizeChange={handlePageSizeChange}
+              />
             </>
           )}
         </div>
@@ -137,21 +280,30 @@ function SearchResultsInner({ workers }: { workers: Worker[] }) {
   )
 }
 
-export function SearchResultsClient({ workers }: { workers: Worker[] }) {
+export function SearchResultsClient() {
   const searchParams = useSearchParams()
   const urlKey = searchParams.toString()
-  const { district: initialDistrict, jobTypes: initialJobTypes } = useMemo(
-    () => parseSearchUrlParams(new URLSearchParams(urlKey)),
-    [urlKey]
-  )
+  const {
+    district: initialDistrict,
+    categoryIds: initialCategoryIds,
+    subcategoryIds: initialSubcategoryIds,
+    jobTypes: initialJobTypes,
+    searchQuery: initialSearchQuery,
+    minRating: initialMinRating,
+    verifiedOnly: initialVerifiedOnly,
+  } = useMemo(() => parseSearchUrlParams(new URLSearchParams(urlKey)), [urlKey])
 
   return (
     <SearchFiltersProvider
-      key={urlKey}
       initialDistrict={initialDistrict}
+      initialCategoryIds={initialCategoryIds}
+      initialSubcategoryIds={initialSubcategoryIds}
       initialJobTypes={initialJobTypes}
+      initialSearchQuery={initialSearchQuery}
+      initialMinRating={initialMinRating}
+      initialVerifiedOnly={initialVerifiedOnly}
     >
-      <SearchResultsInner workers={workers} />
+      <SearchResultsInner />
     </SearchFiltersProvider>
   )
 }

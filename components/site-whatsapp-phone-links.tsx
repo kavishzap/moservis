@@ -13,7 +13,7 @@ type SiteWhatsAppPhoneLinksProps = {
 /** Inline WhatsApp links to platform numbers (legal copy, etc.). */
 export function SiteWhatsAppPhoneLinks({
   separator = " · ",
-  className = "text-primary underline underline-offset-2 hover:text-primary/90",
+  className = "text-teal underline underline-offset-2 hover:text-teal/90",
 }: SiteWhatsAppPhoneLinksProps) {
   return (
     <>

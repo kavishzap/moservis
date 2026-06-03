@@ -2,15 +2,15 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { ImageResponse } from 'next/og'
 
-/** Amber-500 — matches `viewport.themeColor` / tab theme */
-export const BRAND_ICON_BG = '#e28e00'
+/** White — favicon / apple touch icon background */
+export const BRAND_ICON_BG = '#FFFFFF'
 
-const ICON_FILENAME = 'zotserviceicon.png'
+const ICON_FILENAME = 'zotservishelmet.png'
 
 export async function brandIconImageResponse(size: number) {
   const buf = await readFile(join(process.cwd(), 'public', ICON_FILENAME))
   const src = `data:image/png;base64,${buf.toString('base64')}`
-  const inner = Math.round(size * 0.85)
+  const inner = Math.round(size * 0.94)
 
   return new ImageResponse(
     (

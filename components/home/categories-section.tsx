@@ -1,79 +1,86 @@
 import Link from "next/link"
-import type { LucideIcon } from "lucide-react"
+import { buildSearchHref } from "@/lib/search-url"
+import { sectionScrollMargin, siteContainer } from "@/lib/site-layout"
+import { IconFrame } from "@/components/icons/illustrative/icon-frame"
 import {
-  Zap,
-  Droplets,
-  Sparkles,
-  Flower2,
-  Paintbrush,
-  Hammer,
-  Building2,
-  Wrench,
-  Wind,
-  Car,
-} from "lucide-react"
-import { BROWSE_CATEGORY_ORDER, SERVICE_TYPES } from "@/lib/search-options"
-import type { ServiceTypeValue } from "@/lib/search-options"
-import { AmberAmbientBlurs } from "@/components/home/amber-ambient"
+  CategoryIllustrationBySeed,
+  MoreCategoriesIllustration,
+} from "@/components/icons/illustrative/category-icons"
+import type { ServiceCategory } from "@/services/categoryService"
 
-const CATEGORY_ICONS: Partial<
-  Record<ServiceTypeValue, { icon: LucideIcon; color: string }>
-> = {
-  electrician: { icon: Zap, color: "bg-zinc-950 text-amber-400 ring-1 ring-primary/30" },
-  plumber: { icon: Droplets, color: "bg-zinc-950 text-amber-400 ring-1 ring-primary/30" },
-  cleaner: { icon: Sparkles, color: "bg-zinc-950 text-amber-400 ring-1 ring-primary/30" },
-  gardener: { icon: Flower2, color: "bg-zinc-950 text-amber-400 ring-1 ring-primary/30" },
-  painter: { icon: Paintbrush, color: "bg-zinc-950 text-amber-400 ring-1 ring-primary/30" },
-  carpenter: { icon: Hammer, color: "bg-zinc-950 text-amber-400 ring-1 ring-primary/30" },
-  mason: { icon: Building2, color: "bg-zinc-950 text-amber-400 ring-1 ring-primary/30" },
-  handyman: { icon: Wrench, color: "bg-zinc-950 text-amber-400 ring-1 ring-primary/30" },
-  "ac-technician": { icon: Wind, color: "bg-zinc-950 text-amber-400 ring-1 ring-primary/30" },
-  mechanic: { icon: Car, color: "bg-zinc-950 text-amber-400 ring-1 ring-primary/30" },
+/** Mockup-style rows: 4 + 4 + remainder centered */
+function chunkCategories<T>(items: readonly T[]): T[][] {
+  if (items.length <= 4) return [items.slice()]
+  if (items.length <= 8) return [items.slice(0, 4), items.slice(4)]
+  return [items.slice(0, 4), items.slice(4, 8), items.slice(8)]
 }
 
-const labelByValue = Object.fromEntries(SERVICE_TYPES.map((s) => [s.value, s.label])) as Record<
-  ServiceTypeValue,
-  string
->
+type CategoriesSectionProps = {
+  categories: ServiceCategory[]
+}
 
-export function CategoriesSection() {
+export function CategoriesSection({ categories }: CategoriesSectionProps) {
+  const rows = chunkCategories(categories)
+
   return (
-    <section
+    <div
       id="categories"
-      className="scroll-mt-20 relative overflow-hidden py-16 md:py-24"
+      className={`${sectionScrollMargin} border-t border-border/60 bg-background pb-12 pt-6 md:pb-14 md:pt-8`}
     >
-      <AmberAmbientBlurs />
-      <div className="container relative z-0 mx-auto px-4">
-        <div className="mb-12 text-center">
-          <h2 className="mb-3 text-3xl font-bold text-foreground md:text-4xl">
+      <div className={siteContainer}>
+        <div className="mb-5 text-center md:mb-6">
+          <h3 className="mb-2 text-lg font-semibold text-ocean sm:text-xl">
             Browse by Category
-          </h2>
-          <p className="text-muted-foreground">
-            Find the right professional for any job around your home or business
+          </h3>
+          <p className="mx-auto max-w-2xl text-xs text-slate sm:text-sm">
+            Select a category to explore trusted local workers for your home and business.
           </p>
         </div>
 
-        <div className="mx-auto grid max-w-5xl grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
-          {BROWSE_CATEGORY_ORDER.map((value) => {
-            const meta = CATEGORY_ICONS[value]!
-            const label = labelByValue[value]
-            return (
-              <Link
-                key={value}
-                href={`/search?category=${value}`}
-                className="group flex flex-col items-center gap-3 rounded-2xl border border-primary/25 bg-card p-6 text-center transition-all hover:border-primary/50 hover:shadow-[0_0_24px_rgba(245,158,11,0.16)]"
+        {categories.length === 0 ? (
+          <p className="text-center text-sm text-muted-foreground">
+            Categories are unavailable right now.{" "}
+            <Link href={buildSearchHref()} className="font-medium text-teal hover:underline">
+              Browse all workers
+            </Link>
+          </p>
+        ) : (
+          <div className="flex flex-col items-center gap-3 sm:gap-4">
+            {rows.map((row, rowIndex) => (
+              <ul
+                key={rowIndex}
+                className="flex w-full flex-wrap items-center justify-center gap-2.5 sm:gap-3"
               >
-                <div
-                  className={`rounded-xl p-3 ${meta.color} transition-transform group-hover:scale-110`}
-                >
-                  <meta.icon className="h-6 w-6" />
-                </div>
-                <span className="text-sm font-medium text-foreground">{label}</span>
-              </Link>
-            )
-          })}
-        </div>
+                {row.map((category) => (
+                  <li key={category.id}>
+                    <Link
+                      href={buildSearchHref({ categoryIds: [category.id] })}
+                      className="group flex min-w-[9.5rem] items-center gap-3 rounded-full bg-white px-4 py-3 shadow-sm ring-1 ring-black/[0.06] transition-all hover:-translate-y-0.5 hover:shadow-md sm:min-w-[10.5rem] sm:px-5 sm:py-3.5"
+                    >
+                      <IconFrame size="sm" className="rounded-xl bg-sand/80 p-1">
+                        <CategoryIllustrationBySeed seed={category.id} />
+                      </IconFrame>
+                      <span className="text-left text-sm font-semibold leading-tight text-ocean">
+                        {category.name}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ))}
+
+            <Link
+              href={buildSearchHref()}
+              className="group mt-1 flex min-w-[9.5rem] items-center gap-3 rounded-full bg-white px-4 py-3 shadow-sm ring-1 ring-black/[0.06] transition-all hover:-translate-y-0.5 hover:shadow-md sm:min-w-[10.5rem] sm:px-5 sm:py-3.5"
+            >
+              <IconFrame size="sm">
+                <MoreCategoriesIllustration />
+              </IconFrame>
+              <span className="text-sm font-semibold text-ocean">View all workers</span>
+            </Link>
+          </div>
+        )}
       </div>
-    </section>
+    </div>
   )
 }

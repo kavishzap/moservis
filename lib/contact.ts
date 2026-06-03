@@ -1,5 +1,7 @@
-/** Platform WhatsApp lines (footer, marketing). */
-export const SITE_CONTACT_PHONES = ["+230 57833020", "+230 59182520"] as const
+/** Platform contact line (footer, marketing). */
+export const SITE_CONTACT_PHONE = "+230 58350456" as const
+
+export const SITE_CONTACT_PHONES = [SITE_CONTACT_PHONE] as const
 
 /** Default message when opening WhatsApp to the platform. */
 export const PLATFORM_WHATSAPP_DEFAULT_MESSAGE = "Hello, I'm contacting ZotServis."

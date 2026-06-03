@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Poppins, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import { Toaster } from "@/components/ui/sonner"
 import "./globals.css"
 
 const poppins = Poppins({
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport = {
-  themeColor: "#f59e0b",
+  themeColor: "#0B3C5D",
 }
 
 export default function RootLayout({
@@ -51,13 +52,14 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body className={`${poppins.variable} ${geistMono.variable} font-sans antialiased`}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
         />
         {children}
+        <Toaster />
         <Analytics />
       </body>
     </html>

@@ -107,7 +107,14 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "data-[highlighted]:bg-accent/20 data-[highlighted]:text-white [&_svg:not([class*='text-'])]:text-muted-foreground data-[highlighted]:[&_svg:not([class*='text-'])]:text-white/80 relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        "relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "data-[highlighted]:bg-ocean data-[highlighted]:text-white",
+        "data-[state=checked]:bg-teal/12 data-[state=checked]:font-medium data-[state=checked]:text-ocean",
+        "data-[highlighted]:data-[state=checked]:bg-ocean data-[highlighted]:data-[state=checked]:text-white",
+        "[&_svg:not([class*='text-'])]:text-muted-foreground",
+        "data-[highlighted]:[&_svg:not([class*='text-'])]:text-white/90",
+        "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "*:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
         className,
       )}
       {...props}

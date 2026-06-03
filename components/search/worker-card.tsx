@@ -1,8 +1,9 @@
 import Link from "next/link"
-import { MapPin, BadgeCheck, Clock, Mail, UserCircle } from "lucide-react"
+import { MapPin, BadgeCheck, Clock, Mail, UserCircle, Star } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { WorkerContactActions } from "@/components/worker-contact-actions"
+import { workerProfilePath } from "@/lib/worker-urls"
 import type { Worker } from "@/lib/worker-map"
 
 export type { Worker } from "@/lib/worker-map"
@@ -12,11 +13,19 @@ interface WorkerCardProps {
 }
 
 export function WorkerCard({ worker }: WorkerCardProps) {
+  const profileHref = workerProfilePath(worker.id)
+
   return (
-    <div className="group rounded-2xl border border-primary/25 bg-card p-6 shadow-[0_0_20px_rgba(245,158,11,0.1)] transition-all hover:border-primary/50 hover:shadow-[0_0_28px_rgba(245,158,11,0.16)]">
-      <div className="flex flex-col gap-4 sm:flex-row">
+    <article className="group relative rounded-2xl border border-teal/25 bg-card p-6 shadow-[0_8px_28px_rgb(30_111_138_/_0.08)] transition-all hover:border-teal/45 hover:shadow-[0_12px_36px_rgb(30_111_138_/_0.14)]">
+      <Link
+        href={profileHref}
+        className="absolute inset-0 z-[1] rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2"
+        aria-label={`View profile for ${worker.name}`}
+      />
+
+      <div className="pointer-events-none relative z-[2] flex flex-col gap-4 sm:flex-row">
         <Avatar className="h-16 w-16 shrink-0">
-          <AvatarFallback className="bg-primary text-lg text-primary-foreground">
+          <AvatarFallback className="bg-teal text-lg text-white">
             {worker.initials}
           </AvatarFallback>
         </Avatar>
@@ -24,15 +33,28 @@ export function WorkerCard({ worker }: WorkerCardProps) {
         <div className="min-w-0 flex-1">
           <div className="mb-2">
             <div className="flex flex-wrap items-center gap-2">
-              <Link
-                href={`/worker/${worker.id}`}
-                className="font-semibold text-foreground underline-offset-4 hover:underline"
-              >
+              <p className="font-semibold text-foreground underline-offset-4 group-hover:underline">
                 {worker.name}
-              </Link>
-              {worker.verified && <BadgeCheck className="h-5 w-5 shrink-0 text-accent" aria-hidden />}
+              </p>
+              {worker.verified && (
+                <BadgeCheck
+                  className="h-5 w-5 shrink-0 text-accent"
+                  aria-label="Verified worker"
+                />
+              )}
+              {worker.totalReviews > 0 && (
+                <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+                  <Star className="h-4 w-4 fill-gold text-gold" aria-hidden />
+                  <span className="font-semibold tabular-nums text-foreground">
+                    {worker.averageRating.toFixed(1)}
+                  </span>
+                  <span>
+                    ({worker.totalReviews}{" "}
+                    {worker.totalReviews === 1 ? "review" : "reviews"})
+                  </span>
+                </span>
+              )}
             </div>
-            <p className="text-sm text-muted-foreground">{worker.title}</p>
           </div>
 
           <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
@@ -50,18 +72,22 @@ export function WorkerCard({ worker }: WorkerCardProps) {
             </div>
           </div>
 
-          <p className="mb-4 text-sm text-muted-foreground line-clamp-3">{worker.description}</p>
+          <p className="mb-4 line-clamp-3 text-sm text-muted-foreground">
+            {worker.description}
+          </p>
 
-          <div className="mb-3 flex flex-wrap items-center gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Job types:
-            </span>
-            {worker.jobTypes.map((slug, i) => (
-              <Badge key={slug} variant="outline" className="text-xs">
-                {worker.jobTypeLabels[i] ?? slug}
-              </Badge>
-            ))}
-          </div>
+          {worker.jobTypeLabels.length > 0 && (
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Categories:
+              </span>
+              {worker.jobTypeLabels.map((label, i) => (
+                <Badge key={`${worker.jobTypes[i] ?? label}-${i}`} variant="outline" className="text-xs">
+                  {label}
+                </Badge>
+              ))}
+            </div>
+          )}
 
           <div className="mb-4 flex flex-wrap gap-2">
             {worker.services.slice(0, 4).map((service, idx) => (
@@ -74,26 +100,28 @@ export function WorkerCard({ worker }: WorkerCardProps) {
                 +{worker.services.length - 4} more
               </Badge>
             )}
-            {worker.services.length === 0 && (
+            {worker.services.length === 0 && worker.jobTypeLabels.length === 0 && (
               <span className="text-xs text-muted-foreground">No services listed yet</span>
             )}
           </div>
 
-          {worker.email ? (
-            <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
-              <Mail className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-              <a
-                href={`mailto:${worker.email}?subject=Inquiry%20from%20ZotServis`}
-                className="text-primary underline-offset-2 hover:underline"
-              >
-                {worker.email}
-              </a>
-            </div>
-          ) : null}
+          <div className="pointer-events-auto relative z-[3]">
+            {worker.email ? (
+              <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
+                <Mail className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                <a
+                  href={`mailto:${worker.email}?subject=Inquiry%20from%20ZotServis`}
+                  className="text-teal underline-offset-2 hover:underline"
+                >
+                  {worker.email}
+                </a>
+              </div>
+            ) : null}
 
-          <WorkerContactActions phone={worker.phone} workerName={worker.name} title={worker.title} />
+            <WorkerContactActions phone={worker.phone} workerName={worker.name} title={worker.title} />
+          </div>
         </div>
       </div>
-    </div>
+    </article>
   )
 }

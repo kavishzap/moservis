@@ -20,7 +20,10 @@ type ServiceTypePillsProps = {
 export function ServiceTypePills({ selected, onToggle, className, labelId }: ServiceTypePillsProps) {
   return (
     <div
-      className={cn("flex flex-wrap gap-2", className)}
+      className={cn(
+        "flex w-full min-w-0 max-w-full flex-wrap items-start justify-start gap-2",
+        className
+      )}
       role="group"
       aria-labelledby={labelId}
     >
@@ -31,13 +34,13 @@ export function ServiceTypePills({ selected, onToggle, className, labelId }: Ser
             <Badge
               key={value}
               variant="outline"
-              className="h-8 gap-1 rounded-full border-primary/50 bg-primary/15 pr-1 text-sm font-medium text-primary [a&]:hover:bg-primary/25"
+              className="inline-flex h-auto min-h-8 w-auto max-w-full shrink items-start justify-start gap-1 rounded-full border-teal/50 bg-teal/10 px-3 py-1.5 pr-1 text-left text-sm leading-snug font-medium whitespace-normal text-teal [a&]:hover:bg-teal/20"
             >
-              {label}
+              <span className="min-w-0 break-words">{label}</span>
               <button
                 type="button"
                 onClick={() => onToggle(value)}
-                className="ml-0.5 rounded-full p-0.5 hover:bg-primary/20"
+                className="ml-0.5 rounded-full p-0.5 hover:bg-teal/20"
                 aria-label={`Remove ${label}`}
               >
                 <X className="h-3 w-3" />
@@ -51,9 +54,9 @@ export function ServiceTypePills({ selected, onToggle, className, labelId }: Ser
             type="button"
             onClick={() => onToggle(value)}
             aria-pressed={false}
-            className="inline-flex h-8 items-center rounded-full border border-dashed border-primary/30 bg-muted/30 px-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/55 hover:bg-muted/60 hover:text-foreground"
+            className="inline-flex h-auto min-h-8 max-w-full items-center rounded-full border border-dashed border-teal/30 bg-muted/30 px-3 py-1.5 text-left text-sm leading-snug font-medium whitespace-normal text-muted-foreground transition-colors hover:border-teal/50 hover:bg-muted/60 hover:text-foreground"
           >
-            {label}
+            <span className="min-w-0 break-words">{label}</span>
           </button>
         )
       })}

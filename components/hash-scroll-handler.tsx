@@ -2,6 +2,10 @@
 
 import { useEffect } from "react"
 import { usePathname } from "next/navigation"
+import {
+  consumeSkipNextHashScroll,
+  scrollToSectionWhenReady,
+} from "@/lib/scroll-to-section"
 
 /** Scroll to `location.hash` on home and on `hashchange` (SPA + soft nav). */
 export function HashScrollHandler() {
@@ -11,10 +15,17 @@ export function HashScrollHandler() {
     if (pathname !== "/") return
 
     const scrollToHash = () => {
+      if (consumeSkipNextHashScroll()) {
+        window.history.replaceState(null, "", "/")
+        window.scrollTo({ top: 0, behavior: "smooth" })
+        return
+      }
+
       const id = window.location.hash?.replace(/^#/, "")
       if (!id) return
+
       requestAnimationFrame(() => {
-        document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" })
+        scrollToSectionWhenReady(id)
       })
     }
 

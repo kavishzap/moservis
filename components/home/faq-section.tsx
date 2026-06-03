@@ -6,7 +6,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { AmberAmbientBlurs } from "@/components/home/amber-ambient"
+import { BrandAmbientBlurs } from "@/components/home/brand-ambient"
+import { sectionScrollMargin, siteContainer } from "@/lib/site-layout"
 
 const faqs = [
   {
@@ -19,7 +20,7 @@ const faqs = [
   },
   {
     question: "How can I register as a worker?",
-    answer: "Click on 'Become a Worker' in the navigation menu and fill out the registration form. You'll need to provide your contact details, service area, and some information about your experience. Once verified, your profile will be visible to customers.",
+    answer: "Click on 'Join as a Worker' in the navigation menu and fill out the registration form. You'll need to provide your contact details, service area, and some information about your experience. Once verified, your profile will be visible to customers.",
   },
   {
     question: "Is ZotServis free?",
@@ -36,27 +37,27 @@ export function FAQSection() {
   return (
     <section
       id="faq"
-      className="scroll-mt-20 relative overflow-hidden py-16 md:py-24"
+      className={`${sectionScrollMargin} relative overflow-hidden py-10 md:py-14`}
     >
-      <AmberAmbientBlurs />
-      <div className="container relative z-0 mx-auto px-4">
-        <div className="mb-12 text-center">
-          <h2 className="mb-3 text-3xl font-bold text-foreground md:text-4xl">
+      <BrandAmbientBlurs subtle />
+      <div className={`relative z-0 ${siteContainer}`}>
+        <div className="mb-6 text-center md:mb-8">
+          <h2 className="mb-2 text-2xl font-bold text-foreground sm:text-3xl md:text-4xl">
             Frequently Asked Questions
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-sm text-muted-foreground sm:text-base">
             Got questions? We&apos;ve got answers.
           </p>
         </div>
 
-        <div className="mx-auto max-w-2xl">
+        <div className="mx-auto max-w-3xl">
           <Accordion type="single" collapsible className="w-full">
             {faqs.map((faq, index) => (
               <AccordionItem key={index} value={`item-${index}`} className="border-b border-border">
-                <AccordionTrigger className="text-left text-foreground hover:text-primary hover:no-underline">
+                <AccordionTrigger className="py-3 text-left text-base text-foreground hover:text-teal hover:no-underline sm:py-3.5">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
+                <AccordionContent className="pb-3 text-sm leading-relaxed text-muted-foreground sm:pb-3.5">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>

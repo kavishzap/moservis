@@ -7,7 +7,9 @@ import {
   WORKER_YEARLY_SAVINGS_PCT,
   WORKER_YEARLY_SAVINGS_RS,
 } from "@/lib/worker-pricing"
-import { AmberAmbientBlurs } from "@/components/home/amber-ambient"
+import { goldButtonClassName } from "@/lib/brand-buttons"
+import { sectionScrollMargin, siteContainer } from "@/lib/site-layout"
+import { cn } from "@/lib/utils"
 
 const benefits = [
   {
@@ -36,84 +38,78 @@ export function CTASection() {
   return (
     <section
       id="become-a-worker"
-      className="scroll-mt-20 relative overflow-hidden py-16 md:py-24"
+      className={`${sectionScrollMargin} py-16 md:py-24`}
     >
-      <AmberAmbientBlurs />
-      <div className="container relative z-0 mx-auto px-4">
-        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-zinc-950 to-black shadow-xl shadow-black/50 ring-1 ring-primary/[0.05]">
-          <div className="pointer-events-none absolute -right-20 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-primary/[0.055] blur-3xl" aria-hidden />
-          <div className="pointer-events-none absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-primary/[0.035] blur-3xl" aria-hidden />
+      <div className={`${siteContainer}`}>
+        <div className="relative w-full overflow-hidden rounded-3xl bg-ocean ring-1 ring-white/10">
+          <div className="pointer-events-none absolute -right-20 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-teal/15 blur-3xl" aria-hidden />
           <div className="relative grid items-start gap-10 p-8 md:grid-cols-2 md:items-center md:gap-12 md:p-12 lg:p-16">
-            {/* Left Content */}
             <div className="flex flex-col items-center text-center md:items-start md:text-left">
-              <p className="mb-4 inline-flex w-fit items-center rounded-full border border-primary/50 bg-primary/10 px-4 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-primary">
+              <p className="mb-4 inline-flex w-fit items-center rounded-full border border-teal/40 bg-teal/15 px-4 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-white/90">
                 Are you a worker?
               </p>
-              <h2 className="mb-4 max-w-xl text-balance text-3xl font-bold leading-[1.15] tracking-tight md:text-4xl lg:text-[2.35rem]">
-                <span className="block text-white drop-shadow-[0_0_24px_rgba(255,255,255,0.08)]">
-                  Join{" "}
-                  <span className="bg-gradient-to-r from-primary via-[#fde68a] to-primary bg-clip-text text-transparent">
-                    ZotServis
-                  </span>
+              <h2 className="mb-4 max-w-xl text-balance text-3xl font-bold leading-[1.15] tracking-tight text-white md:text-4xl lg:text-[2.35rem]">
+                <span className="block">
+                  Join <span className="text-gold">ZotServis</span>
                 </span>
                 <span className="mt-2 block text-2xl font-semibold leading-snug text-white/90 md:text-3xl">
                   and get more clients
                 </span>
               </h2>
-              <p className="mb-4 max-w-xl text-pretty text-base leading-relaxed text-white/70 md:text-lg">
+              <p className="mb-4 max-w-xl text-pretty text-base leading-relaxed text-white/75 md:text-lg">
                 Register your profile and start receiving job requests from customers across Mauritius.
               </p>
-              <div className="mb-8 w-full max-w-xl rounded-2xl border border-primary/35 bg-primary/[0.06] p-5 text-left shadow-[inset_0_1px_0_0_rgba(245,158,11,0.18)]">
-                <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-primary">
+              <div className="mb-8 w-full max-w-xl rounded-2xl border border-white/15 bg-white/10 p-5 text-left">
+                <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-white/85">
                   Pricing
                 </p>
                 <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-8">
                   <div>
-                    <p className="text-3xl font-bold tabular-nums text-white">
+                    <p className="text-3xl font-bold tabular-nums text-gold">
                       Rs {WORKER_MONTHLY_RS}
-                      <span className="text-lg font-semibold text-white/65">/month</span>
+                      <span className="text-lg font-semibold text-gold/80">/month</span>
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                    <p className="text-3xl font-bold tabular-nums text-white">
+                    <p className="text-3xl font-bold tabular-nums text-gold">
                       Rs {WORKER_YEARLY_RS.toLocaleString("en-MU")}
-                      <span className="text-lg font-semibold text-white/65">/year</span>
+                      <span className="text-lg font-semibold text-gold/80">/year</span>
                     </p>
-                    <span className="inline-flex rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-sm font-bold text-primary">
+                    <span className="inline-flex rounded-full border border-gold/40 bg-gold/15 px-3 py-1 text-sm font-bold text-gold">
                       Save {WORKER_YEARLY_SAVINGS_PCT}%
                     </span>
                   </div>
                 </div>
-                <p className="mt-3 text-sm text-white/55">
+                <p className="mt-3 text-sm text-white/60">
                   Yearly billing saves Rs {WORKER_YEARLY_SAVINGS_RS} compared to 12 monthly payments (
                   {WORKER_YEARLY_SAVINGS_PCT}% off).
                 </p>
               </div>
               <div className="w-full max-w-xl">
-                <Link href="/register" className="block w-full md:inline-block md:w-auto">
-                  <Button
-                    size="lg"
-                    className="h-12 w-full rounded-full px-8 font-semibold shadow-[0_0_24px_rgba(245,158,11,0.35)] md:w-auto"
-                  >
-                    Register as a Worker
-                  </Button>
-                </Link>
+                <Button
+                  asChild
+                  className={cn(
+                    goldButtonClassName,
+                    "h-12 w-full shrink-0 rounded-full px-8 md:w-auto"
+                  )}
+                >
+                  <Link href="/register">Register as a Worker</Link>
+                </Button>
               </div>
             </div>
 
-            {/* Right - benefits */}
             <div className="flex flex-col gap-6">
               <div className="grid gap-4 sm:grid-cols-2">
                 {benefits.map((benefit) => (
                   <div
                     key={benefit.title}
-                    className="rounded-2xl border border-primary/20 bg-white/[0.04] p-5 backdrop-blur-sm transition-colors hover:border-primary/35 hover:bg-white/[0.06]"
+                    className="rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm transition-colors hover:border-teal/35 hover:bg-white/14"
                   >
-                    <div className="mb-3 inline-flex rounded-lg border border-primary/25 bg-primary/10 p-2">
-                      <benefit.icon className="h-5 w-5 text-primary" />
+                    <div className="mb-3 inline-flex rounded-full border border-white/35 bg-white/10 p-2.5 text-white">
+                      <benefit.icon className="h-5 w-5 shrink-0 text-white" aria-hidden />
                     </div>
-                    <h3 className="mb-1 font-semibold text-white">{benefit.title}</h3>
-                    <p className="text-sm text-white/65">{benefit.description}</p>
+                    <h3 className="mb-1 font-semibold text-gold">{benefit.title}</h3>
+                    <p className="text-sm text-white/70">{benefit.description}</p>
                   </div>
                 ))}
               </div>
