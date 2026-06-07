@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Poppins, Geist_Mono } from "next/font/google"
-import { Analytics } from "@vercel/analytics/next"
+import { AnalyticsWithConsent } from "@/components/analytics-with-consent"
+import { CookieConsentModal } from "@/components/cookie-consent-modal"
 import { Toaster } from "@/components/ui/sonner"
 import "./globals.css"
 
@@ -59,8 +60,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
         />
         {children}
+        <CookieConsentModal />
         <Toaster />
-        <Analytics />
+        <AnalyticsWithConsent />
       </body>
     </html>
   )
