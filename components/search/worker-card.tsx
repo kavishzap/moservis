@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { MapPin, BadgeCheck, Clock, Mail, UserCircle, Star } from "lucide-react"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { WorkerAvatar } from "@/components/worker/worker-avatar"
 import { Badge } from "@/components/ui/badge"
 import { WorkerContactActions } from "@/components/worker-contact-actions"
 import { workerProfilePath } from "@/lib/worker-urls"
@@ -24,11 +24,12 @@ export function WorkerCard({ worker }: WorkerCardProps) {
       />
 
       <div className="pointer-events-none relative z-[2] flex flex-col gap-4 sm:flex-row">
-        <Avatar className="h-16 w-16 shrink-0">
-          <AvatarFallback className="bg-teal text-lg text-white">
-            {worker.initials}
-          </AvatarFallback>
-        </Avatar>
+        <WorkerAvatar
+          profileImage={worker.profileImage}
+          initials={worker.initials}
+          className="h-16 w-16 shrink-0"
+          fallbackClassName="text-lg"
+        />
 
         <div className="min-w-0 flex-1">
           <div className="mb-2">

@@ -27,6 +27,12 @@ type UpdateMyWorkerProfilePayload = {
   district?: string | null
   areas_served?: string | null
   about?: string | null
+  profile_image?: string | null
+  portfolio_images?: string[]
+
+  facebook_url?: string | null
+  instagram_url?: string | null
+  tiktok_url?: string | null
 
   category_ids?: string[]
   subcategory_ids?: string[]
@@ -258,6 +264,11 @@ Deno.serve(async (req) => {
         district,
         areas_served,
         about,
+        profile_image,
+        portfolio_images,
+        facebook_url,
+        instagram_url,
+        tiktok_url,
 
         subscription_plan,
         trial_start_date,
@@ -338,6 +349,11 @@ Deno.serve(async (req) => {
       district: updatedWorker.district,
       areas_served: updatedWorker.areas_served,
       about: updatedWorker.about,
+      profile_image: updatedWorker.profile_image,
+      portfolio_images: normalizePortfolioImages(updatedWorker.portfolio_images),
+      facebook_url: updatedWorker.facebook_url,
+      instagram_url: updatedWorker.instagram_url,
+      tiktok_url: updatedWorker.tiktok_url,
 
       subscription_plan: updatedWorker.subscription_plan,
       trial_start_date: updatedWorker.trial_start_date,
@@ -472,6 +488,26 @@ function buildUpdatePayload(body: UpdateMyWorkerProfilePayload) {
     payload.about = cleanNullableString(body.about, 2000)
   }
 
+  if (body.profile_image !== undefined) {
+    payload.profile_image = validateProfileImage(body.profile_image)
+  }
+
+  if (body.portfolio_images !== undefined) {
+    payload.portfolio_images = validatePortfolioImages(body.portfolio_images)
+  }
+
+  if (body.facebook_url !== undefined) {
+    payload.facebook_url = validateSocialUrl(body.facebook_url)
+  }
+
+  if (body.instagram_url !== undefined) {
+    payload.instagram_url = validateSocialUrl(body.instagram_url)
+  }
+
+  if (body.tiktok_url !== undefined) {
+    payload.tiktok_url = validateSocialUrl(body.tiktok_url)
+  }
+
   return payload
 }
 
@@ -532,6 +568,104 @@ function cleanNullableString(
   }
 
   return cleaned
+}
+
+const PROFILE_IMAGE_PATTERN =
+  /^data:image\/(?:jpeg|jpg|png|webp);base64,[A-Za-z0-9+/=]+$/
+const MAX_PROFILE_IMAGE_LENGTH = 200_000
+
+function validateProfileImage(value: string | null | undefined) {
+  if (value === null || value === undefined) {
+    return null
+  }
+
+  const cleaned = value.trim()
+
+  if (!cleaned) {
+    return null
+  }
+
+  if (!PROFILE_IMAGE_PATTERN.test(cleaned)) {
+    throw new Error("Invalid profile image format")
+  }
+
+  if (cleaned.length > MAX_PROFILE_IMAGE_LENGTH) {
+    throw new Error("Profile image is too large")
+  }
+
+  return cleaned
+}
+
+const PORTFOLIO_IMAGE_PATTERN =
+  /^data:image\/(?:jpeg|jpg|png|webp|gif);base64,[A-Za-z0-9+/=]+$/
+const MAX_PORTFOLIO_IMAGES = 5
+const MAX_PORTFOLIO_IMAGE_LENGTH = 7_000_000
+
+function validatePortfolioImages(value: unknown) {
+  if (!Array.isArray(value)) {
+    throw new Error("portfolio_images must be an array")
+  }
+
+  if (value.length > MAX_PORTFOLIO_IMAGES) {
+    throw new Error(`portfolio_images must not exceed ${MAX_PORTFOLIO_IMAGES} items`)
+  }
+
+  return value.map((item, index) => {
+    if (typeof item !== "string") {
+      throw new Error(`portfolio_images[${index}] must be a string`)
+    }
+
+    const cleaned = item.trim()
+
+    if (!cleaned) {
+      throw new Error(`portfolio_images[${index}] cannot be empty`)
+    }
+
+    if (!PORTFOLIO_IMAGE_PATTERN.test(cleaned)) {
+      throw new Error(`portfolio_images[${index}] has invalid format`)
+    }
+
+    if (cleaned.length > MAX_PORTFOLIO_IMAGE_LENGTH) {
+      throw new Error(`portfolio_images[${index}] is too large`)
+    }
+
+    return cleaned
+  })
+}
+
+function validateSocialUrl(value: string | null | undefined) {
+  if (value === null || value === undefined) {
+    return null
+  }
+
+  const cleaned = value.trim()
+
+  if (!cleaned) {
+    return null
+  }
+
+  if (cleaned.length > 500) {
+    throw new Error("Social URL is too long")
+  }
+
+  let parsed: URL
+
+  try {
+    parsed = new URL(cleaned)
+  } catch {
+    throw new Error("Invalid social media URL")
+  }
+
+  if (!["http:", "https:"].includes(parsed.protocol)) {
+    throw new Error("Social URL must start with http:// or https://")
+  }
+
+  return cleaned
+}
+
+function normalizePortfolioImages(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value.filter((item): item is string => typeof item === "string")
 }
 
 function uniqueIds(values: string[]) {

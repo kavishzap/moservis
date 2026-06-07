@@ -91,6 +91,11 @@ Deno.serve(async (req) => {
         district,
         areas_served,
         about,
+        profile_image,
+        portfolio_images,
+        facebook_url,
+        instagram_url,
+        tiktok_url,
         subscription_plan,
         trial_start_date,
         trial_end_date,
@@ -264,6 +269,11 @@ Deno.serve(async (req) => {
       district: rawWorker.district,
       areas_served: rawWorker.areas_served,
       about: rawWorker.about,
+      profile_image: rawWorker.profile_image,
+      portfolio_images: normalizePortfolioImages(rawWorker.portfolio_images),
+      facebook_url: rawWorker.facebook_url,
+      instagram_url: rawWorker.instagram_url,
+      tiktok_url: rawWorker.tiktok_url,
 
       subscription_plan: rawWorker.subscription_plan,
       trial_start_date: rawWorker.trial_start_date,
@@ -397,4 +407,9 @@ function getPercentage(count: number, total: number) {
 
 function jsonResponse(body: unknown, status = 200) {
   return encodedJsonResponse(body, status, corsHeaders)
+}
+
+function normalizePortfolioImages(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value.filter((item): item is string => typeof item === "string")
 }

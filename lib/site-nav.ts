@@ -9,8 +9,7 @@ export type SiteNavItem = {
 
 /** Home section links — order matches header top bar. */
 export const SECTION_NAV: SiteNavItem[] = [
-  { key: "community", id: "why-choose-us", label: "Community" },
-  { key: "categories", id: "categories", label: "Browse by Category" },
+  { key: "categories", id: "categories", label: "Category" },
   { key: "faq", id: "faq", label: "FAQ" },
   { key: "join-worker", id: "become-a-worker", label: "Join as a Worker" },
 ]

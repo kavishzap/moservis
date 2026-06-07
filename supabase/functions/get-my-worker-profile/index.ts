@@ -93,6 +93,11 @@ Deno.serve(async (req) => {
         district,
         areas_served,
         about,
+        profile_image,
+        portfolio_images,
+        facebook_url,
+        instagram_url,
+        tiktok_url,
 
         subscription_plan,
         trial_start_date,
@@ -181,6 +186,11 @@ Deno.serve(async (req) => {
       district: worker.district,
       areas_served: worker.areas_served,
       about: worker.about,
+      profile_image: worker.profile_image,
+      portfolio_images: normalizePortfolioImages(worker.portfolio_images),
+      facebook_url: worker.facebook_url,
+      instagram_url: worker.instagram_url,
+      tiktok_url: worker.tiktok_url,
 
       subscription_plan: worker.subscription_plan,
       trial_start_date: worker.trial_start_date,
@@ -278,4 +288,9 @@ async function getPublicUser(
 
 function jsonResponse(body: unknown, status = 200) {
   return encodedJsonResponse(body, status, corsHeaders)
+}
+
+function normalizePortfolioImages(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value.filter((item): item is string => typeof item === "string")
 }

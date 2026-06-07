@@ -17,6 +17,7 @@ export type Worker = {
   phone: string
   email: string | null
   initials: string
+  profileImage: string | null
   workerKind: "individual" | "company"
   categories: WorkerListItem["categories"]
   subcategories: WorkerListItem["subcategories"]
@@ -69,6 +70,7 @@ export function mapWorkerListItemToWorker(item: WorkerListItem): Worker {
     phone: item.phone_number,
     email: item.email,
     initials: initialsFromWorker(item),
+    profileImage: item.profile_image,
     workerKind: item.worker_type === "Company" ? "company" : "individual",
     categories: item.categories,
     subcategories: item.subcategories,

@@ -236,6 +236,7 @@ Deno.serve(async (req) => {
       district: worker.district,
       areas_served: worker.areas_served,
       about: worker.about,
+      profile_image: worker.profile_image,
 
       is_verified: worker.is_verified,
 
@@ -302,6 +303,7 @@ function buildWorkerSelect(
         district,
         areas_served,
         about,
+        profile_image,
         is_verified,
         average_rating,
         total_reviews,

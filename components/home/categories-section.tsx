@@ -8,31 +8,25 @@ import {
 } from "@/components/icons/illustrative/category-icons"
 import type { ServiceCategory } from "@/services/categoryService"
 
-/** Mockup-style rows: 4 + 4 + remainder centered */
-function chunkCategories<T>(items: readonly T[]): T[][] {
-  if (items.length <= 4) return [items.slice()]
-  if (items.length <= 8) return [items.slice(0, 4), items.slice(4)]
-  return [items.slice(0, 4), items.slice(4, 8), items.slice(8)]
-}
-
 type CategoriesSectionProps = {
   categories: ServiceCategory[]
 }
 
-export function CategoriesSection({ categories }: CategoriesSectionProps) {
-  const rows = chunkCategories(categories)
+const categoryCardClassName =
+  "group flex h-full min-h-[4.5rem] items-center gap-3 rounded-2xl border border-teal/15 bg-card px-4 py-3.5 shadow-[0_2px_10px_rgb(11_60_93_/_0.04)] transition-all hover:-translate-y-0.5 hover:border-teal/35 hover:shadow-[0_8px_24px_rgb(30_111_138_/_0.1)]"
 
+export function CategoriesSection({ categories }: CategoriesSectionProps) {
   return (
     <div
       id="categories"
-      className={`${sectionScrollMargin} border-t border-border/60 bg-background pb-12 pt-6 md:pb-14 md:pt-8`}
+      className={`${sectionScrollMargin} border-t border-border/60 bg-muted/20 pb-14 pt-10 md:pb-16 md:pt-12`}
     >
       <div className={siteContainer}>
-        <div className="mb-5 text-center md:mb-6">
-          <h3 className="mb-2 text-lg font-semibold text-ocean sm:text-xl">
+        <div className="mx-auto mb-8 max-w-2xl text-center md:mb-10">
+          <h3 className="mb-2 text-xl font-bold text-ocean sm:text-2xl">
             Browse by Category
           </h3>
-          <p className="mx-auto max-w-2xl text-xs text-slate sm:text-sm">
+          <p className="text-sm text-muted-foreground sm:text-base">
             Select a category to explore trusted local workers for your home and business.
           </p>
         </div>
@@ -45,40 +39,39 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
             </Link>
           </p>
         ) : (
-          <div className="flex flex-col items-center gap-3 sm:gap-4">
-            {rows.map((row, rowIndex) => (
-              <ul
-                key={rowIndex}
-                className="flex w-full flex-wrap items-center justify-center gap-2.5 sm:gap-3"
-              >
-                {row.map((category) => (
-                  <li key={category.id}>
-                    <Link
-                      href={buildSearchHref({ categoryIds: [category.id] })}
-                      className="group flex min-w-[9.5rem] items-center gap-3 rounded-full bg-white px-4 py-3 shadow-sm ring-1 ring-black/[0.06] transition-all hover:-translate-y-0.5 hover:shadow-md sm:min-w-[10.5rem] sm:px-5 sm:py-3.5"
-                    >
-                      <IconFrame size="sm" className="rounded-xl bg-sand/80 p-1">
-                        <CategoryIllustrationBySeed seed={category.id} />
-                      </IconFrame>
-                      <span className="text-left text-sm font-semibold leading-tight text-ocean">
-                        {category.name}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {categories.map((category) => (
+              <li key={category.id} className="min-h-0">
+                <Link
+                  href={buildSearchHref({ categoryIds: [category.id] })}
+                  className={categoryCardClassName}
+                >
+                  <IconFrame
+                    size="sm"
+                    className="rounded-xl bg-sand/80 p-1 transition-colors group-hover:bg-sand"
+                  >
+                    <CategoryIllustrationBySeed seed={category.id} />
+                  </IconFrame>
+                  <span className="min-w-0 flex-1 text-sm font-semibold leading-snug text-ocean">
+                    {category.name}
+                  </span>
+                </Link>
+              </li>
             ))}
-
-            <Link
-              href={buildSearchHref()}
-              className="group mt-1 flex min-w-[9.5rem] items-center gap-3 rounded-full bg-white px-4 py-3 shadow-sm ring-1 ring-black/[0.06] transition-all hover:-translate-y-0.5 hover:shadow-md sm:min-w-[10.5rem] sm:px-5 sm:py-3.5"
-            >
-              <IconFrame size="sm">
-                <MoreCategoriesIllustration />
-              </IconFrame>
-              <span className="text-sm font-semibold text-ocean">View all workers</span>
-            </Link>
-          </div>
+            <li className="min-h-0">
+              <Link href={buildSearchHref()} className={categoryCardClassName}>
+                <IconFrame
+                  size="sm"
+                  className="rounded-xl bg-sand/80 p-1 transition-colors group-hover:bg-sand"
+                >
+                  <MoreCategoriesIllustration />
+                </IconFrame>
+                <span className="min-w-0 flex-1 text-sm font-semibold leading-snug text-ocean">
+                  View all workers
+                </span>
+              </Link>
+            </li>
+          </ul>
         )}
       </div>
     </div>

@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import {
   Accordion,
   AccordionContent,
@@ -50,19 +51,32 @@ export function FAQSection() {
           </p>
         </div>
 
-        <div className="mx-auto max-w-3xl">
-          <Accordion type="single" collapsible className="w-full">
-            {faqs.map((faq, index) => (
-              <AccordionItem key={index} value={`item-${index}`} className="border-b border-border">
-                <AccordionTrigger className="py-3 text-left text-base text-foreground hover:text-teal hover:no-underline sm:py-3.5">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent className="pb-3 text-sm leading-relaxed text-muted-foreground sm:pb-3.5">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+        <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] xl:gap-12">
+          <div className="min-w-0">
+            <Accordion type="single" collapsible className="w-full">
+              {faqs.map((faq, index) => (
+                <AccordionItem key={index} value={`item-${index}`} className="border-b border-border">
+                  <AccordionTrigger className="py-3 text-left text-base text-foreground hover:text-teal hover:no-underline sm:py-3.5">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-3 text-sm leading-relaxed text-muted-foreground sm:pb-3.5">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+
+          <div className="relative mx-auto w-full max-w-sm lg:mx-0 lg:max-w-none lg:pt-1">
+            <Image
+              src="/zotservismap.png"
+              alt="Map of Mauritius with local workers ready to help across the island"
+              width={640}
+              height={640}
+              className="h-auto w-full rounded-2xl"
+              sizes="(min-width: 1280px) 416px, (min-width: 1024px) 352px, 384px"
+            />
+          </div>
         </div>
       </div>
     </section>

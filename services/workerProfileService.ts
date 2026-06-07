@@ -21,6 +21,12 @@ export type WorkerDashboardProfile = {
   district: string | null
   areas_served: string | null
   about: string | null
+  profile_image: string | null
+  portfolio_images: string[]
+
+  facebook_url: string | null
+  instagram_url: string | null
+  tiktok_url: string | null
 
   subscription_plan: "Monthly" | "Yearly" | null
   trial_start_date: string
@@ -80,6 +86,12 @@ export type UpdateMyWorkerProfilePayload = {
   district?: string | null
   areas_served?: string | null
   about?: string | null
+  profile_image?: string | null
+  portfolio_images?: string[]
+
+  facebook_url?: string | null
+  instagram_url?: string | null
+  tiktok_url?: string | null
 
   category_ids?: string[]
   subcategory_ids?: string[]

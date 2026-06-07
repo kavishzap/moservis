@@ -8,6 +8,9 @@ import { BrandAmbientBlurs } from "@/components/home/brand-ambient"
 import { WorkerContactActions } from "@/components/worker-contact-actions"
 import { WorkerReviewActions } from "@/components/worker/worker-review-actions"
 import { SearchPaginationNav } from "@/components/search/search-pagination"
+import { WorkerAvatar } from "@/components/worker/worker-avatar"
+import { PortfolioGallery } from "@/components/worker/portfolio-gallery"
+import { WorkerSocialLinks } from "@/components/worker/worker-social-links"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -325,11 +328,12 @@ export function WorkerProfileClient({ workerId }: { workerId: string }) {
           <ProfileCard className="mb-6">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
               <div className="flex min-w-0 flex-1 gap-4 sm:gap-5">
-                <Avatar className="h-16 w-16 shrink-0 sm:h-20 sm:w-20">
-                  <AvatarFallback className="bg-teal text-xl text-white sm:text-2xl">
-                    {workerDisplayInitials(worker)}
-                  </AvatarFallback>
-                </Avatar>
+                <WorkerAvatar
+                  profileImage={worker.profile_image}
+                  initials={workerDisplayInitials(worker)}
+                  className="h-16 w-16 shrink-0 sm:h-20 sm:w-20"
+                  fallbackClassName="text-xl sm:text-2xl"
+                />
 
                 <div className="min-w-0 flex-1">
                   <div className="mb-1 flex flex-wrap items-center gap-2">
@@ -383,7 +387,11 @@ export function WorkerProfileClient({ workerId }: { workerId: string }) {
             <div className="space-y-5">
               {(worker.about ||
                 worker.categories.length > 0 ||
-                worker.subcategories.length > 0) && (
+                worker.subcategories.length > 0 ||
+                worker.portfolio_images.length > 0 ||
+                worker.facebook_url ||
+                worker.instagram_url ||
+                worker.tiktok_url) && (
                 <ProfileCard className="space-y-5">
                   {worker.about ? (
                     <div>
@@ -419,6 +427,21 @@ export function WorkerProfileClient({ workerId }: { workerId: string }) {
                       </div>
                     </div>
                   )}
+
+                  {worker.portfolio_images.length > 0 && (
+                    <div>
+                      <h2 className="mb-3 text-base font-semibold text-foreground">Portfolio</h2>
+                      <PortfolioGallery images={worker.portfolio_images} />
+                    </div>
+                  )}
+
+                  <WorkerSocialLinks
+                    links={{
+                      facebook_url: worker.facebook_url,
+                      instagram_url: worker.instagram_url,
+                      tiktok_url: worker.tiktok_url,
+                    }}
+                  />
                 </ProfileCard>
               )}
 

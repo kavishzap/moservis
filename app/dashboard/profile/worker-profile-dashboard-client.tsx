@@ -12,7 +12,14 @@ import {
 } from "lucide-react"
 import { toast } from "@/lib/toast"
 import { RequiredStar } from "@/components/auth/required-star"
+import { SignOutButton } from "@/components/auth/sign-out-button"
 import { SelectionPills } from "@/components/search/selection-pills"
+import { ProfilePhotoUpload } from "@/components/worker/profile-photo-upload"
+import { PortfolioUpload } from "@/components/worker/portfolio-upload"
+import {
+  SocialLinksFields,
+  type SocialLinksForm,
+} from "@/components/worker/social-links-fields"
 import { WorkerReviewActions } from "@/components/worker/worker-review-actions"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -59,6 +66,9 @@ type FormState = {
   district: string
   areasServed: string
   about: string
+  profileImage: string | null
+  portfolioImages: string[]
+  socialLinks: SocialLinksForm
   categoryIds: string[]
   subcategoryIds: string[]
 }
@@ -76,6 +86,13 @@ function profileToForm(profile: WorkerDashboardProfile): FormState {
     district: resolveDistrictSelectValue(profile.district),
     areasServed: profile.areas_served ?? "",
     about: profile.about ?? "",
+    profileImage: profile.profile_image,
+    portfolioImages: [...profile.portfolio_images],
+    socialLinks: {
+      facebookUrl: profile.facebook_url ?? "",
+      instagramUrl: profile.instagram_url ?? "",
+      tiktokUrl: profile.tiktok_url ?? "",
+    },
     categoryIds: [...profile.category_ids],
     subcategoryIds: [...profile.subcategory_ids],
   }
@@ -98,6 +115,47 @@ function ProfileCard({
       {children}
     </section>
   )
+}
+
+function dashboardInitials(form: FormState): string {
+  if (form.workerType === "Company" && form.companyName.trim()) {
+    return form.companyName.trim().slice(0, 2).toUpperCase()
+  }
+  const a = form.firstName.trim().charAt(0).toUpperCase()
+  const b = form.lastName.trim().charAt(0).toUpperCase()
+  return `${a}${b}` || "?"
+}
+
+function profileImageChanged(
+  current: string | null,
+  saved: string | null,
+): boolean {
+  return current !== saved
+}
+
+function portfolioChanged(current: string[], saved: string[]): boolean {
+  if (current.length !== saved.length) return true
+  return current.some((item, index) => item !== saved[index])
+}
+
+function socialLinksChanged(
+  current: SocialLinksForm,
+  saved: {
+    facebook_url: string | null
+    instagram_url: string | null
+    tiktok_url: string | null
+  },
+): boolean {
+  return (
+    current.facebookUrl.trim() !== (saved.facebook_url ?? "") ||
+    current.instagramUrl.trim() !== (saved.instagram_url ?? "") ||
+    current.tiktokUrl.trim() !== (saved.tiktok_url ?? "")
+  )
+}
+
+function normalizeSocialUrl(value: string): string | null {
+  const trimmed = value.trim()
+  return trimmed || null
 }
 
 export function WorkerProfileDashboardClient() {
@@ -262,6 +320,19 @@ export function WorkerProfileDashboardClient() {
         district: districtLabelForApi(form.district),
         areas_served: form.areasServed.trim() || null,
         about: form.about.trim(),
+        ...(profileImageChanged(form.profileImage, profile.profile_image)
+          ? { profile_image: form.profileImage }
+          : {}),
+        ...(portfolioChanged(form.portfolioImages, profile.portfolio_images)
+          ? { portfolio_images: form.portfolioImages }
+          : {}),
+        ...(socialLinksChanged(form.socialLinks, profile)
+          ? {
+              facebook_url: normalizeSocialUrl(form.socialLinks.facebookUrl),
+              instagram_url: normalizeSocialUrl(form.socialLinks.instagramUrl),
+              tiktok_url: normalizeSocialUrl(form.socialLinks.tiktokUrl),
+            }
+          : {}),
         category_ids: form.categoryIds,
         subcategory_ids: form.subcategoryIds,
       })
@@ -293,9 +364,9 @@ export function WorkerProfileDashboardClient() {
           <Button onClick={() => void loadProfile()} variant="outline">
             Try again
           </Button>
-          <Button onClick={() => void handleSignOut()} variant="ghost">
+          <SignOutButton onSignOut={handleSignOut} variant="ghost">
             Sign out
-          </Button>
+          </SignOutButton>
         </div>
       </div>
     )
@@ -321,16 +392,15 @@ export function WorkerProfileDashboardClient() {
                 View public profile
               </Link>
             </Button>
-            <Button
-              type="button"
+            <SignOutButton
+              onSignOut={handleSignOut}
               variant="outline"
               size="sm"
               className="gap-2"
-              onClick={() => void handleSignOut()}
             >
               <LogOut className="h-4 w-4" aria-hidden />
               Sign out
-            </Button>
+            </SignOutButton>
           </div>
         </div>
 
@@ -399,6 +469,17 @@ export function WorkerProfileDashboardClient() {
               <p className="mb-5 text-sm text-muted-foreground">
                 How you appear on your public profile and how customers reach you.
               </p>
+
+              <div className="mb-6">
+                <ProfilePhotoUpload
+                  profileImage={form.profileImage}
+                  initials={dashboardInitials(form)}
+                  disabled={saving}
+                  onChange={(value) =>
+                    setForm((prev) => (prev ? { ...prev, profileImage: value } : prev))
+                  }
+                />
+              </div>
 
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="space-y-3 sm:col-span-2">
@@ -646,6 +727,26 @@ export function WorkerProfileDashboardClient() {
                       setForm((prev) => (prev ? { ...prev, about: e.target.value } : prev))
                     }
                     required
+                  />
+                </div>
+
+                <div className="space-y-2 sm:col-span-2">
+                  <PortfolioUpload
+                    images={form.portfolioImages}
+                    disabled={saving}
+                    onChange={(images) =>
+                      setForm((prev) => (prev ? { ...prev, portfolioImages: images } : prev))
+                    }
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <SocialLinksFields
+                    value={form.socialLinks}
+                    disabled={saving}
+                    onChange={(socialLinks) =>
+                      setForm((prev) => (prev ? { ...prev, socialLinks } : prev))
+                    }
                   />
                 </div>
               </div>
