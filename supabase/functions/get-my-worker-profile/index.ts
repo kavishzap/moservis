@@ -3,6 +3,10 @@ import {
   readEncodedPayload,
   encodedJsonResponse,
 } from "../_shared/encoded.ts"
+import {
+  MAX_PORTFOLIO_IMAGE_STORE_LENGTH,
+  normalizePortfolioImages,
+} from "../_shared/response-images.ts"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -93,8 +97,6 @@ Deno.serve(async (req) => {
         district,
         areas_served,
         about,
-        profile_image,
-        portfolio_images,
         facebook_url,
         instagram_url,
         tiktok_url,
@@ -146,8 +148,6 @@ Deno.serve(async (req) => {
       .maybeSingle()
 
     if (workerError) {
-      console.error("get-my-worker-profile error:", workerError)
-
       return jsonResponse(
         {
           error: "Failed to fetch worker profile",
@@ -163,6 +163,11 @@ Deno.serve(async (req) => {
         404,
       )
     }
+
+    const [profileImage, portfolioImages] = await Promise.all([
+      fetchSafeProfileImage(serviceClient, worker.id, MAX_PORTFOLIO_IMAGE_STORE_LENGTH),
+      fetchSafePortfolioImages(serviceClient, worker.id, MAX_PORTFOLIO_IMAGE_STORE_LENGTH),
+    ])
 
     const profile = {
       id: worker.id,
@@ -186,8 +191,8 @@ Deno.serve(async (req) => {
       district: worker.district,
       areas_served: worker.areas_served,
       about: worker.about,
-      profile_image: worker.profile_image,
-      portfolio_images: normalizePortfolioImages(worker.portfolio_images),
+      profile_image: profileImage,
+      portfolio_images: portfolioImages,
       facebook_url: worker.facebook_url,
       instagram_url: worker.instagram_url,
       tiktok_url: worker.tiktok_url,
@@ -239,10 +244,10 @@ Deno.serve(async (req) => {
       profile,
     })
   } catch (error) {
-    console.error("Unexpected get-my-worker-profile error:", error)
-
     return jsonResponse(
-      { error: "Unexpected server error" },
+      {
+        error: error instanceof Error ? error.message : "Unexpected server error",
+      },
       500,
     )
   }
@@ -262,7 +267,7 @@ async function getPublicUser(
     .maybeSingle()
 
   if (userByIdError) {
-    console.error("get public user by id error:", userByIdError)
+    // ignore lookup failure; fall through to email lookup
   }
 
   if (userById) {
@@ -280,7 +285,7 @@ async function getPublicUser(
     .maybeSingle()
 
   if (userByEmailError) {
-    console.error("get public user by email error:", userByEmailError)
+    // ignore lookup failure
   }
 
   return userByEmail
@@ -290,7 +295,33 @@ function jsonResponse(body: unknown, status = 200) {
   return encodedJsonResponse(body, status, corsHeaders)
 }
 
-function normalizePortfolioImages(value: unknown): string[] {
-  if (!Array.isArray(value)) return []
-  return value.filter((item): item is string => typeof item === "string")
+async function fetchSafeProfileImage(
+  supabase: ReturnType<typeof createClient>,
+  workerId: string,
+  maxLength: number,
+): Promise<string | null> {
+  const { data, error } = await supabase.rpc("safe_profile_image", {
+    p_worker_id: workerId,
+    p_max_length: maxLength,
+  })
+
+  if (error || data == null || typeof data !== "string") return null
+
+  const cleaned = data.trim()
+  return cleaned || null
+}
+
+async function fetchSafePortfolioImages(
+  supabase: ReturnType<typeof createClient>,
+  workerId: string,
+  maxElemLength: number,
+): Promise<string[]> {
+  const { data, error } = await supabase.rpc("safe_portfolio_images", {
+    p_worker_id: workerId,
+    p_max_elem_length: maxElemLength,
+  })
+
+  if (error || data == null) return []
+
+  return normalizePortfolioImages(data)
 }

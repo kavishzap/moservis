@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Facebook, Instagram } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 type SocialLinks = {
   facebook_url: string | null
@@ -20,7 +21,17 @@ function TikTokIcon({ className }: { className?: string }) {
   )
 }
 
-export function WorkerSocialLinks({ links }: { links: SocialLinks }) {
+type WorkerSocialLinksProps = {
+  links: SocialLinks
+  variant?: "labeled" | "icons"
+  className?: string
+}
+
+export function WorkerSocialLinks({
+  links,
+  variant = "labeled",
+  className,
+}: WorkerSocialLinksProps) {
   const items = [
     { href: links.facebook_url, label: "Facebook", icon: Facebook },
     { href: links.instagram_url, label: "Instagram", icon: Instagram },
@@ -29,8 +40,28 @@ export function WorkerSocialLinks({ links }: { links: SocialLinks }) {
 
   if (items.length === 0) return null
 
+  if (variant === "icons") {
+    return (
+      <div className={cn("flex flex-wrap items-center gap-2", className)}>
+        {items.map(({ href, label, icon: Icon }) => (
+          <Link
+            key={label}
+            href={href!}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={label}
+            title={label}
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-teal/35 bg-card text-teal transition-colors hover:border-ocean hover:bg-ocean hover:text-white"
+          >
+            <Icon className="h-4 w-4" aria-hidden />
+          </Link>
+        ))}
+      </div>
+    )
+  }
+
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={cn("flex flex-wrap gap-2", className)}>
       {items.map(({ href, label, icon: Icon }) => (
         <Link
           key={label}

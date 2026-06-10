@@ -12,7 +12,7 @@ export const SITE_CONTACT_EMAIL = "zotservissupport@gmail.com"
 /** Footer social — override with `NEXT_PUBLIC_SITE_FACEBOOK_URL` / `NEXT_PUBLIC_SITE_TIKTOK_URL` in `.env`. */
 export const SITE_FACEBOOK_URL = "https://www.facebook.com/profile.php?id=61574511476103";
 
-export const SITE_TIKTOK_URL = "https://www.tiktok.com/@zotservis";
+export const SITE_TIKTOK_URL = "https://www.tiktok.com/@zotservis.com";
 
 /** Pretty +230 XXXX XXXX for display. */
 export function formatSitePhoneDisplay(phone: string): string {

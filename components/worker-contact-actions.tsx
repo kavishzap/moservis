@@ -64,8 +64,8 @@ export function WorkerContactActions({
       <div
         className={
           layout === "stacked"
-            ? `flex flex-col gap-2 ${className ?? ""}`
-            : `flex flex-wrap gap-2 ${className ?? ""}`
+            ? cn("flex flex-col gap-2", className)
+            : cn("inline-flex flex-wrap items-center gap-2", className)
         }
       >
         <Button size="sm" className={cn("gap-2", btnClass)} disabled={!canContact} asChild={canContact}>

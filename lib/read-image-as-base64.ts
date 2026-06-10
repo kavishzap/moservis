@@ -6,7 +6,7 @@ const ACCEPTED_TYPES = new Set([
   "image/gif",
 ])
 
-const MAX_FILE_BYTES = 5 * 1024 * 1024
+const MAX_FILE_BYTES = 350_000
 
 export class PortfolioImageError extends Error {
   constructor(message: string) {
@@ -21,7 +21,7 @@ export function readImageAsBase64(file: File): Promise<string> {
   }
 
   if (file.size > MAX_FILE_BYTES) {
-    return Promise.reject(new PortfolioImageError("Each image must be 5 MB or smaller."))
+    return Promise.reject(new PortfolioImageError("Each image must be 350 KB or smaller."))
   }
 
   return new Promise((resolve, reject) => {

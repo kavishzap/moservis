@@ -13,6 +13,18 @@ type ServiceTypePillsProps = {
   labelId?: string
 }
 
+const pillGroupClass =
+  "flex w-full min-w-0 max-w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-stretch sm:justify-start"
+
+const pillTextClass =
+  "block min-w-0 w-full [overflow-wrap:anywhere] break-words text-sm leading-normal font-medium"
+
+const unselectedPillClass =
+  "box-border flex h-auto min-h-9 w-full max-w-full items-center justify-center overflow-hidden rounded-full border border-dashed border-teal/30 bg-muted/30 px-4 py-2.5 text-center text-muted-foreground transition-colors hover:border-teal/50 hover:bg-muted/60 hover:text-foreground sm:max-w-full"
+
+const selectedPillClass =
+  "box-border flex h-auto min-h-9 w-full max-w-full items-start justify-start gap-1.5 overflow-hidden rounded-full border-teal/50 bg-teal/10 px-4 py-2.5 pr-2 text-left whitespace-normal text-teal [a&]:hover:bg-teal/20 sm:max-w-full"
+
 /**
  * Multi-select job/service types as removable pills when selected (same pattern as
  * “Services offered” on register) and dashed chips when unselected.
@@ -20,10 +32,7 @@ type ServiceTypePillsProps = {
 export function ServiceTypePills({ selected, onToggle, className, labelId }: ServiceTypePillsProps) {
   return (
     <div
-      className={cn(
-        "flex w-full min-w-0 max-w-full flex-wrap items-start justify-start gap-2",
-        className
-      )}
+      className={cn(pillGroupClass, className)}
       role="group"
       aria-labelledby={labelId}
     >
@@ -34,13 +43,13 @@ export function ServiceTypePills({ selected, onToggle, className, labelId }: Ser
             <Badge
               key={value}
               variant="outline"
-              className="inline-flex h-auto min-h-8 w-auto max-w-full shrink items-start justify-start gap-1 rounded-full border-teal/50 bg-teal/10 px-3 py-1.5 pr-1 text-left text-sm leading-snug font-medium whitespace-normal text-teal [a&]:hover:bg-teal/20"
+              className={cn(selectedPillClass, "h-auto shrink whitespace-normal")}
             >
-              <span className="min-w-0 break-words">{label}</span>
+              <span className={pillTextClass}>{label}</span>
               <button
                 type="button"
                 onClick={() => onToggle(value)}
-                className="ml-0.5 rounded-full p-0.5 hover:bg-teal/20"
+                className="mt-0.5 shrink-0 rounded-full p-0.5 hover:bg-teal/20"
                 aria-label={`Remove ${label}`}
               >
                 <X className="h-3 w-3" />
@@ -54,9 +63,9 @@ export function ServiceTypePills({ selected, onToggle, className, labelId }: Ser
             type="button"
             onClick={() => onToggle(value)}
             aria-pressed={false}
-            className="inline-flex h-auto min-h-8 max-w-full items-center rounded-full border border-dashed border-teal/30 bg-muted/30 px-3 py-1.5 text-left text-sm leading-snug font-medium whitespace-normal text-muted-foreground transition-colors hover:border-teal/50 hover:bg-muted/60 hover:text-foreground"
+            className={unselectedPillClass}
           >
-            <span className="min-w-0 break-words">{label}</span>
+            <span className={pillTextClass}>{label}</span>
           </button>
         )
       })}

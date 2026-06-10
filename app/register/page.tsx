@@ -27,7 +27,6 @@ import {
 } from "@/components/ui/dialog"
 import { MAURITIUS_DISTRICTS } from "@/lib/search-options"
 import { districtLabelForApi } from "@/lib/worker-dashboard"
-import { Badge } from "@/components/ui/badge"
 import {
   DEFAULT_WORKER_PLAN,
   WORKER_MONTHLY_RS,
@@ -40,6 +39,7 @@ import { cn } from "@/lib/utils"
 import { PHONE_INPUT_PLACEHOLDER } from "@/lib/contact"
 import { AUTH_PATHS } from "@/lib/auth-urls"
 import { CheckCircle2, Loader2, Users, Phone, TrendingUp, Shield, X } from "lucide-react"
+import { SelectionPills } from "@/components/search/selection-pills"
 import { toast } from "@/lib/toast"
 import { normalizeEmail } from "@/lib/worker-application"
 import {
@@ -94,56 +94,6 @@ function RequiredStar() {
     <span className="text-destructive" aria-hidden>
       *
     </span>
-  )
-}
-
-function SelectionPills({
-  items,
-  selectedIds,
-  onToggle,
-  labelId,
-}: {
-  items: { id: string; name: string }[]
-  selectedIds: string[]
-  onToggle: (id: string) => void
-  labelId?: string
-}) {
-  return (
-    <div className="flex flex-wrap gap-2" role="group" aria-labelledby={labelId}>
-      {items.map(({ id, name }) => {
-        const isOn = selectedIds.includes(id)
-        if (isOn) {
-          return (
-            <Badge
-              key={id}
-              variant="outline"
-              className="h-8 gap-1 rounded-full border-teal/50 bg-teal/10 pr-1 text-sm font-medium text-teal [a&]:hover:bg-teal/20"
-            >
-              {name}
-              <button
-                type="button"
-                onClick={() => onToggle(id)}
-                className="ml-0.5 rounded-full p-0.5 hover:bg-teal/20"
-                aria-label={`Remove ${name}`}
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          )
-        }
-        return (
-          <button
-            key={id}
-            type="button"
-            onClick={() => onToggle(id)}
-            aria-pressed={false}
-            className="inline-flex h-8 items-center rounded-full border border-dashed border-teal/30 bg-muted/30 px-3 text-sm font-medium text-muted-foreground transition-colors hover:border-teal/50 hover:bg-muted/60 hover:text-foreground"
-          >
-            {name}
-          </button>
-        )
-      })}
-    </div>
   )
 }
 
@@ -581,8 +531,8 @@ export default function RegisterPage() {
                       title="Service information"
                       description="What you do and where you work in Mauritius."
                     >
-                      <div className="grid gap-5 sm:grid-cols-2">
-                        <div className="space-y-2 sm:col-span-2">
+                      <div className="grid min-w-0 gap-5 sm:grid-cols-2">
+                        <div className="min-w-0 space-y-2 sm:col-span-2">
                           <Label id="categories-label" className="text-sm font-medium">
                             Categories <RequiredStar />
                           </Label>
@@ -618,7 +568,7 @@ export default function RegisterPage() {
                         </div>
 
                         {selectedCategoryIds.length > 0 && availableSubcategories.length > 0 && (
-                          <div className="space-y-2 sm:col-span-2">
+                          <div className="min-w-0 space-y-2 sm:col-span-2">
                             <Label id="subcategories-label" className="text-sm font-medium">
                               Subcategories <RequiredStar />
                             </Label>

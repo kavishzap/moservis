@@ -3,6 +3,13 @@ import {
   readEncodedPayload,
   encodedJsonResponse,
 } from "../_shared/encoded.ts"
+import {
+  normalizePortfolioImages,
+  MAX_RESPONSE_DATA_URI_LENGTH,
+  MAX_PORTFOLIO_RESPONSE_LENGTH,
+  buildPortfolioResponse,
+  sanitizeProfileImageForResponse,
+} from "../_shared/response-images.ts"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -91,8 +98,6 @@ Deno.serve(async (req) => {
         district,
         areas_served,
         about,
-        profile_image,
-        portfolio_images,
         facebook_url,
         instagram_url,
         tiktok_url,
@@ -151,8 +156,6 @@ Deno.serve(async (req) => {
     const { data: workerRows, error: workerError } = await workerQuery
 
     if (workerError) {
-      console.error("get-worker-id worker error:", workerError)
-
       return jsonResponse(
         {
           error: "Failed to fetch worker",
@@ -175,7 +178,9 @@ Deno.serve(async (req) => {
 
     const [
       reviewsResult,
-      ratingBreakdownResult,
+      ratingBreakdown,
+      portfolioForResponse,
+      profileImageForResponse,
     ] = await Promise.all([
       (() => {
         let query = supabase
@@ -204,17 +209,14 @@ Deno.serve(async (req) => {
           .range(reviewsFrom, reviewsTo)
       })(),
 
-      supabase
-        .from("worker_reviews")
-        .select("rating")
-        .eq("worker_id", rawWorker.id)
-        .eq("is_approved", true)
-        .eq("is_flagged", false),
+      fetchRatingBreakdown(supabase, rawWorker.id),
+
+      fetchPortfolioImagesForResponse(supabase, rawWorker.id),
+
+      fetchProfileImageForResponse(supabase, rawWorker.id),
     ])
 
     if (reviewsResult.error) {
-      console.error("get-worker-id reviews error:", reviewsResult.error)
-
       return jsonResponse(
         {
           error: "Failed to fetch worker reviews",
@@ -224,26 +226,8 @@ Deno.serve(async (req) => {
       )
     }
 
-    if (ratingBreakdownResult.error) {
-      console.error(
-        "get-worker-id rating breakdown error:",
-        ratingBreakdownResult.error,
-      )
-
-      return jsonResponse(
-        {
-          error: "Failed to fetch rating breakdown",
-          details: ratingBreakdownResult.error.message,
-        },
-        500,
-      )
-    }
-
-    const approvedReviews = ratingBreakdownResult.data ?? []
-
-    const ratingBreakdown = buildRatingBreakdown(approvedReviews)
-    const calculatedAverageRating = calculateAverageRating(approvedReviews)
-    const calculatedTotalReviews = approvedReviews.length
+    const storedAverageRating = Number(rawWorker.average_rating ?? 0)
+    const storedTotalReviews = rawWorker.total_reviews ?? 0
 
     const worker = {
       id: rawWorker.id,
@@ -269,8 +253,7 @@ Deno.serve(async (req) => {
       district: rawWorker.district,
       areas_served: rawWorker.areas_served,
       about: rawWorker.about,
-      profile_image: rawWorker.profile_image,
-      portfolio_images: normalizePortfolioImages(rawWorker.portfolio_images),
+      profile_image: profileImageForResponse,
       facebook_url: rawWorker.facebook_url,
       instagram_url: rawWorker.instagram_url,
       tiktok_url: rawWorker.tiktok_url,
@@ -289,11 +272,11 @@ Deno.serve(async (req) => {
 
       review_token: rawWorker.review_token,
 
-      average_rating: Number(rawWorker.average_rating ?? 0),
-      total_reviews: rawWorker.total_reviews ?? 0,
+      average_rating: storedAverageRating,
+      total_reviews: storedTotalReviews,
 
-      calculated_average_rating: calculatedAverageRating,
-      calculated_total_reviews: calculatedTotalReviews,
+      calculated_average_rating: storedAverageRating,
+      calculated_total_reviews: storedTotalReviews,
 
       rating_breakdown: ratingBreakdown,
 
@@ -323,9 +306,15 @@ Deno.serve(async (req) => {
     const reviewsTotal = reviewsResult.count ?? 0
     const reviewsTotalPages = Math.ceil(reviewsTotal / reviewsLimit)
 
+    const portfolio = buildPortfolioResponse(
+      portfolioForResponse,
+      MAX_PORTFOLIO_RESPONSE_LENGTH,
+    )
+
     return jsonResponse({
       success: true,
       worker,
+      portfolio,
       reviews,
       reviews_pagination: {
         page: reviewsPage,
@@ -337,66 +326,86 @@ Deno.serve(async (req) => {
       },
     })
   } catch (error) {
-    console.error("Unexpected get-worker-id error:", error)
-
     return jsonResponse(
       {
-        error: "Unexpected server error",
+        error: error instanceof Error ? error.message : "Unexpected server error",
       },
       500,
     )
   }
 })
 
-function buildRatingBreakdown(reviews: { rating: number }[]) {
-  const total = reviews.length
+async function fetchProfileImageForResponse(
+  supabase: ReturnType<typeof createClient>,
+  workerId: string,
+): Promise<string | null> {
+  const { data, error } = await supabase.rpc("safe_profile_image", {
+    p_worker_id: workerId,
+    p_max_length: MAX_RESPONSE_DATA_URI_LENGTH,
+  })
 
-  const breakdown = {
-    5: 0,
-    4: 0,
-    3: 0,
-    2: 0,
-    1: 0,
-  }
+  if (error || data == null) return null
 
-  for (const review of reviews) {
-    const rating = review.rating as 1 | 2 | 3 | 4 | 5
-
-    if (rating >= 1 && rating <= 5) {
-      breakdown[rating] += 1
-    }
-  }
-
-  return {
-    5: {
-      count: breakdown[5],
-      percentage: getPercentage(breakdown[5], total),
-    },
-    4: {
-      count: breakdown[4],
-      percentage: getPercentage(breakdown[4], total),
-    },
-    3: {
-      count: breakdown[3],
-      percentage: getPercentage(breakdown[3], total),
-    },
-    2: {
-      count: breakdown[2],
-      percentage: getPercentage(breakdown[2], total),
-    },
-    1: {
-      count: breakdown[1],
-      percentage: getPercentage(breakdown[1], total),
-    },
-  }
+  return sanitizeProfileImageForResponse(
+    typeof data === "string" ? data : null,
+  )
 }
 
-function calculateAverageRating(reviews: { rating: number }[]) {
-  if (reviews.length === 0) return 0
+async function fetchPortfolioImagesForResponse(
+  supabase: ReturnType<typeof createClient>,
+  workerId: string,
+): Promise<string[]> {
+  const { data, error } = await supabase.rpc("safe_portfolio_images", {
+    p_worker_id: workerId,
+    p_max_elem_length: MAX_PORTFOLIO_RESPONSE_LENGTH,
+  })
 
-  const total = reviews.reduce((sum, review) => sum + review.rating, 0)
+  if (!error && data != null) {
+    return normalizePortfolioImages(data)
+  }
 
-  return Number((total / reviews.length).toFixed(1))
+  const { data: row, error: rowError } = await supabase
+    .from("worker_profiles")
+    .select("portfolio_images")
+    .eq("id", workerId)
+    .maybeSingle()
+
+  if (rowError || !row) return []
+
+  return normalizePortfolioImages(row.portfolio_images)
+}
+
+async function fetchRatingBreakdown(
+  supabase: ReturnType<typeof createClient>,
+  workerId: string,
+) {
+  const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+
+  await Promise.all(
+    ([1, 2, 3, 4, 5] as const).map(async (rating) => {
+      const { count, error } = await supabase
+        .from("worker_reviews")
+        .select("id", { count: "exact", head: true })
+        .eq("worker_id", workerId)
+        .eq("is_approved", true)
+        .eq("is_flagged", false)
+        .eq("rating", rating)
+
+      if (!error && count != null) {
+        counts[rating] = count
+      }
+    }),
+  )
+
+  const total = counts[5] + counts[4] + counts[3] + counts[2] + counts[1]
+
+  return {
+    5: { count: counts[5], percentage: getPercentage(counts[5], total) },
+    4: { count: counts[4], percentage: getPercentage(counts[4], total) },
+    3: { count: counts[3], percentage: getPercentage(counts[3], total) },
+    2: { count: counts[2], percentage: getPercentage(counts[2], total) },
+    1: { count: counts[1], percentage: getPercentage(counts[1], total) },
+  }
 }
 
 function getPercentage(count: number, total: number) {
@@ -407,9 +416,4 @@ function getPercentage(count: number, total: number) {
 
 function jsonResponse(body: unknown, status = 200) {
   return encodedJsonResponse(body, status, corsHeaders)
-}
-
-function normalizePortfolioImages(value: unknown): string[] {
-  if (!Array.isArray(value)) return []
-  return value.filter((item): item is string => typeof item === "string")
 }

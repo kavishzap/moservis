@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Loader2, X } from "lucide-react"
+import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { Worker } from "@/lib/worker-map"
 import { buildWorkersSearchPayload, mapWorkerListItemToWorker } from "@/lib/worker-map"
@@ -15,6 +15,7 @@ import {
 } from "@/components/search/search-filters"
 import { SearchBar } from "@/components/search/search-bar"
 import { WorkerCard } from "@/components/search/worker-card"
+import { WorkerCardSkeletonList } from "@/components/search/worker-card-skeleton"
 import {
   DEFAULT_PAGE_SIZE,
   SearchPagination,
@@ -222,10 +223,7 @@ function SearchResultsInner() {
           </div>
 
           {loading ? (
-            <div className="flex items-center justify-center gap-2 rounded-2xl border border-dashed border-teal/30 bg-muted/30 px-6 py-16 text-muted-foreground">
-              <Loader2 className="h-5 w-5 animate-spin text-teal" aria-hidden />
-              Loading workers…
-            </div>
+            <WorkerCardSkeletonList count={pageSize} />
           ) : error ? (
             <div className="rounded-2xl border border-destructive/30 bg-destructive/5 px-6 py-12 text-center">
               <p className="font-medium text-foreground">Could not load workers</p>

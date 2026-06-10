@@ -9,7 +9,7 @@ import { WorkerContactActions } from "@/components/worker-contact-actions"
 import { WorkerReviewActions } from "@/components/worker/worker-review-actions"
 import { SearchPaginationNav } from "@/components/search/search-pagination"
 import { WorkerAvatar } from "@/components/worker/worker-avatar"
-import { PortfolioGallery } from "@/components/worker/portfolio-gallery"
+import { WorkerPortfolioSection } from "@/components/worker/worker-portfolio-section"
 import { WorkerSocialLinks } from "@/components/worker/worker-social-links"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -21,9 +21,9 @@ import {
   BadgeCheck,
   Clock,
   Mail,
-  Loader2,
   UserCircle,
 } from "lucide-react"
+import { WorkerProfileSkeleton, ReviewCardSkeletonList } from "@/components/worker/worker-profile-skeleton"
 import { siteContainer } from "@/lib/site-layout"
 import {
   districtLabel,
@@ -36,7 +36,9 @@ import {
 } from "@/lib/worker-profile"
 import {
   getWorkerById,
+  EMPTY_WORKER_PORTFOLIO,
   type WorkerDetails,
+  type WorkerPortfolio,
   type WorkerReview,
 } from "@/services/workerService"
 import { cn } from "@/lib/utils"
@@ -76,9 +78,86 @@ function StarRating({ rating, max = 5 }: { rating: number; max?: number }) {
   )
 }
 
+function WorkerProfileMeta({
+  worker,
+  rating,
+  reviewCount,
+  variant,
+}: {
+  worker: WorkerDetails
+  rating: number
+  reviewCount: number
+  variant: "stacked" | "inline"
+}) {
+  if (variant === "stacked") {
+    return (
+      <ul className="space-y-2.5 text-sm text-muted-foreground">
+        <li className="flex items-start gap-2.5">
+          <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
+          <span className="min-w-0 leading-snug">{workerLocationLine(worker)}</span>
+        </li>
+        {worker.years_of_experience != null && (
+          <li className="flex items-start gap-2.5">
+            <Clock className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
+            <span className="min-w-0 leading-snug">
+              {worker.years_of_experience} years experience
+            </span>
+          </li>
+        )}
+        <li className="flex items-start gap-2.5">
+          <UserCircle className="mt-0.5 h-4 w-4 shrink-0 text-teal" aria-hidden />
+          <span className="min-w-0 capitalize leading-snug">{worker.worker_type}</span>
+        </li>
+        {reviewCount > 0 && (
+          <li className="flex items-start gap-2.5">
+            <Star className="mt-0.5 h-4 w-4 shrink-0 fill-gold text-gold" aria-hidden />
+            <span className="inline-flex min-w-0 flex-wrap items-center gap-1 leading-snug">
+              <span className="font-medium text-ocean">{rating.toFixed(1)}</span>
+              <span>
+                ({reviewCount} {reviewCount === 1 ? "review" : "reviews"})
+              </span>
+            </span>
+          </li>
+        )}
+      </ul>
+    )
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+      <span className="inline-flex items-center gap-1">
+        <MapPin className="h-4 w-4 shrink-0 text-teal" aria-hidden />
+        {workerLocationLine(worker)}
+      </span>
+      {worker.years_of_experience != null && (
+        <span className="inline-flex items-center gap-1">
+          <Clock className="h-4 w-4 shrink-0 text-teal" aria-hidden />
+          {worker.years_of_experience} years experience
+        </span>
+      )}
+      <span className="inline-flex items-center gap-1 capitalize">
+        <UserCircle className="h-4 w-4 shrink-0 text-teal" aria-hidden />
+        {worker.worker_type}
+      </span>
+      {reviewCount > 0 && (
+        <span className="inline-flex items-center gap-1 rounded-full bg-gold/15 px-2.5 py-0.5">
+          <Star className="h-4 w-4 fill-gold text-gold" aria-hidden />
+          <span className="font-medium text-ocean">{rating.toFixed(1)}</span>
+          <span className="text-muted-foreground">({reviewCount})</span>
+        </span>
+      )}
+    </div>
+  )
+}
+
 function ContactCard({ worker }: { worker: WorkerDetails }) {
   const name = worker.display_name?.trim() || "Worker"
   const firstName = name.split(/\s+/)[0] ?? name
+  const socialLinks = {
+    facebook_url: worker.facebook_url,
+    instagram_url: worker.instagram_url,
+    tiktok_url: worker.tiktok_url,
+  }
 
   return (
     <ProfileCard>
@@ -98,6 +177,7 @@ function ContactCard({ worker }: { worker: WorkerDetails }) {
             </a>
           </Button>
         ) : null}
+        <WorkerSocialLinks links={socialLinks} variant="icons" />
       </div>
     </ProfileCard>
   )
@@ -189,6 +269,7 @@ function ReviewRatingFilter({
 
 export function WorkerProfileClient({ workerId }: { workerId: string }) {
   const [worker, setWorker] = useState<WorkerDetails | null>(null)
+  const [portfolio, setPortfolio] = useState<WorkerPortfolio>(EMPTY_WORKER_PORTFOLIO)
   const [reviews, setReviews] = useState<WorkerReview[]>([])
   const [reviewsPage, setReviewsPage] = useState(1)
   const [reviewsTotalPages, setReviewsTotalPages] = useState(1)
@@ -197,7 +278,12 @@ export function WorkerProfileClient({ workerId }: { workerId: string }) {
   const [loading, setLoading] = useState(true)
   const [reviewsLoading, setReviewsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
   const profileLoadedRef = useRef(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const loadProfile = useCallback(
     async (page: number, rating: number | null = ratingFilter) => {
@@ -219,6 +305,7 @@ export function WorkerProfileClient({ workerId }: { workerId: string }) {
         })
 
         setWorker(result.worker)
+        setPortfolio(result.portfolio ?? EMPTY_WORKER_PORTFOLIO)
         setReviews(result.reviews)
         setReviewsPage(result.reviews_pagination.page)
         setReviewsTotalPages(result.reviews_pagination.total_pages)
@@ -230,6 +317,7 @@ export function WorkerProfileClient({ workerId }: { workerId: string }) {
         setError(message)
         if (!reviewsOnly) {
           setWorker(null)
+          setPortfolio(EMPTY_WORKER_PORTFOLIO)
           setReviews([])
           profileLoadedRef.current = false
         }
@@ -244,6 +332,7 @@ export function WorkerProfileClient({ workerId }: { workerId: string }) {
   useEffect(() => {
     profileLoadedRef.current = false
     setRatingFilter(null)
+    setPortfolio(EMPTY_WORKER_PORTFOLIO)
     setReviews([])
     setReviewsPage(1)
   }, [workerId])
@@ -264,18 +353,8 @@ export function WorkerProfileClient({ workerId }: { workerId: string }) {
     void loadProfile(page, ratingFilter)
   }
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen flex-col">
-        <Navbar />
-        <main className="relative flex flex-1 items-center justify-center gap-2 text-muted-foreground">
-          <BrandAmbientBlurs subtle />
-          <Loader2 className="h-5 w-5 animate-spin text-teal" aria-hidden />
-          Loading profile…
-        </main>
-        <Footer />
-      </div>
-    )
+  if (!mounted || loading) {
+    return <WorkerProfileSkeleton />
   }
 
   if (error || !worker) {
@@ -309,6 +388,18 @@ export function WorkerProfileClient({ workerId }: { workerId: string }) {
   const reviewsRangeEnd = Math.min(reviewsPage * REVIEWS_LIMIT, reviewsListTotal)
   const areas = parseAreasServed(worker.areas_served)
   const district = districtLabel(worker.district)
+  const socialLinks = {
+    facebook_url: worker.facebook_url,
+    instagram_url: worker.instagram_url,
+    tiktok_url: worker.tiktok_url,
+  }
+  const hasAboutSection =
+    worker.about ||
+    worker.categories.length > 0 ||
+    worker.subcategories.length > 0 ||
+    Boolean(worker.district) ||
+    areas.length > 0
+  const hasPortfolio = portfolio.count > 0 && portfolio.images.length > 0
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -326,80 +417,85 @@ export function WorkerProfileClient({ workerId }: { workerId: string }) {
           </Link>
 
           <ProfileCard className="mb-6">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-              <div className="flex min-w-0 flex-1 gap-4 sm:gap-5">
+            {/* Mobile */}
+            <div className="space-y-4 lg:hidden">
+              <div className="flex justify-end">
+                <WorkerReviewActions reviewToken={worker.review_token} />
+              </div>
+
+              <div className="flex items-start gap-4">
                 <WorkerAvatar
                   profileImage={worker.profile_image}
                   initials={workerDisplayInitials(worker)}
-                  className="h-16 w-16 shrink-0 sm:h-20 sm:w-20"
-                  fallbackClassName="text-xl sm:text-2xl"
+                  className="h-16 w-16 shrink-0"
+                  fallbackClassName="text-xl"
                 />
-
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 pt-0.5">
                   <div className="mb-1 flex flex-wrap items-center gap-2">
-                    <h1 className="text-xl font-bold text-foreground sm:text-2xl">{name}</h1>
+                    <h1 className="text-xl font-bold text-foreground">{name}</h1>
                     {worker.is_verified && (
                       <BadgeCheck className="h-5 w-5 text-accent" aria-label="Verified" />
                     )}
                   </div>
-                  <p className="mb-3 text-sm text-muted-foreground sm:text-base">{title}</p>
-
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                    <span className="inline-flex items-center gap-1">
-                      <MapPin className="h-4 w-4 shrink-0 text-teal" aria-hidden />
-                      {workerLocationLine(worker)}
-                    </span>
-                    {worker.years_of_experience != null && (
-                      <span className="inline-flex items-center gap-1">
-                        <Clock className="h-4 w-4 shrink-0 text-teal" aria-hidden />
-                        {worker.years_of_experience} years experience
-                      </span>
-                    )}
-                    <span className="inline-flex items-center gap-1 capitalize">
-                      <UserCircle className="h-4 w-4 shrink-0 text-teal" aria-hidden />
-                      {worker.worker_type}
-                    </span>
-                    {reviewCount > 0 && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-gold/15 px-2.5 py-0.5">
-                        <Star className="h-4 w-4 fill-gold text-gold" aria-hidden />
-                        <span className="font-medium text-ocean">{rating.toFixed(1)}</span>
-                        <span className="text-muted-foreground">({reviewCount})</span>
-                      </span>
-                    )}
-                  </div>
+                  <p className="text-sm text-muted-foreground">{title}</p>
                 </div>
               </div>
 
-              <div className="flex shrink-0 flex-wrap items-center gap-2 lg:flex-col lg:items-end">
-                <WorkerReviewActions reviewToken={worker.review_token} />
-                <div className="w-full lg:hidden">
-                  <WorkerContactActions
-                    phone={worker.phone_number}
-                    workerName={name}
-                    title={title}
+              <WorkerProfileMeta
+                worker={worker}
+                rating={rating}
+                reviewCount={reviewCount}
+                variant="stacked"
+              />
+
+              <div className="flex flex-wrap items-center gap-2">
+                <WorkerContactActions
+                  phone={worker.phone_number}
+                  workerName={name}
+                  title={title}
+                />
+                <WorkerSocialLinks links={socialLinks} variant="icons" />
+              </div>
+            </div>
+
+            {/* Desktop */}
+            <div className="hidden lg:flex lg:flex-col lg:gap-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex min-w-0 flex-1 gap-5">
+                  <WorkerAvatar
+                    profileImage={worker.profile_image}
+                    initials={workerDisplayInitials(worker)}
+                    className="h-20 w-20 shrink-0"
+                    fallbackClassName="text-2xl"
                   />
+
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1 flex flex-wrap items-center gap-2">
+                      <h1 className="text-2xl font-bold text-foreground">{name}</h1>
+                      {worker.is_verified && (
+                        <BadgeCheck className="h-5 w-5 text-accent" aria-label="Verified" />
+                      )}
+                    </div>
+                    <p className="mb-3 text-base text-muted-foreground">{title}</p>
+
+                    <WorkerProfileMeta
+                      worker={worker}
+                      rating={rating}
+                      reviewCount={reviewCount}
+                      variant="inline"
+                    />
+                  </div>
                 </div>
+
+                <WorkerReviewActions reviewToken={worker.review_token} />
               </div>
             </div>
           </ProfileCard>
 
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] xl:grid-cols-[minmax(0,1fr)_20rem]">
             <div className="space-y-5">
-              {(worker.about ||
-                worker.categories.length > 0 ||
-                worker.subcategories.length > 0 ||
-                worker.portfolio_images.length > 0 ||
-                worker.facebook_url ||
-                worker.instagram_url ||
-                worker.tiktok_url) && (
+              {hasAboutSection && (
                 <ProfileCard className="space-y-5">
-                  {worker.about ? (
-                    <div>
-                      <h2 className="mb-2 text-base font-semibold text-foreground">About</h2>
-                      <p className="text-sm leading-relaxed text-muted-foreground">{worker.about}</p>
-                    </div>
-                  ) : null}
-
                   {worker.categories.length > 0 && (
                     <div>
                       <h2 className="mb-2 text-base font-semibold text-foreground">Categories</h2>
@@ -428,40 +524,40 @@ export function WorkerProfileClient({ workerId }: { workerId: string }) {
                     </div>
                   )}
 
-                  {worker.portfolio_images.length > 0 && (
+                  {(worker.district || areas.length > 0) && (
                     <div>
-                      <h2 className="mb-3 text-base font-semibold text-foreground">Portfolio</h2>
-                      <PortfolioGallery images={worker.portfolio_images} />
+                      <h2 className="mb-2 text-base font-semibold text-foreground">Areas covered</h2>
+                      <div className="flex flex-wrap gap-2">
+                        {worker.district ? (
+                          <Badge variant="outline" className="text-xs">
+                            <MapPin className="mr-1 h-3 w-3" aria-hidden />
+                            {district}
+                          </Badge>
+                        ) : null}
+                        {areas.map((area) => (
+                          <Badge key={area} variant="outline" className="text-xs">
+                            {area}
+                          </Badge>
+                        ))}
+                        {areas.length === 0 && !worker.district && (
+                          <span className="text-sm text-muted-foreground">Mauritius-wide</span>
+                        )}
+                      </div>
                     </div>
                   )}
 
-                  <WorkerSocialLinks
-                    links={{
-                      facebook_url: worker.facebook_url,
-                      instagram_url: worker.instagram_url,
-                      tiktok_url: worker.tiktok_url,
-                    }}
-                  />
+                  {worker.about ? (
+                    <div>
+                      <h2 className="mb-2 text-base font-semibold text-foreground">About</h2>
+                      <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
+                        {worker.about}
+                      </p>
+                    </div>
+                  ) : null}
                 </ProfileCard>
               )}
 
-              <ProfileCard>
-                <h2 className="mb-3 text-base font-semibold text-foreground">Areas covered</h2>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline" className="text-xs">
-                    <MapPin className="mr-1 h-3 w-3" aria-hidden />
-                    {district}
-                  </Badge>
-                  {areas.map((area) => (
-                    <Badge key={area} variant="outline" className="text-xs">
-                      {area}
-                    </Badge>
-                  ))}
-                  {areas.length === 0 && !worker.district && (
-                    <span className="text-sm text-muted-foreground">Mauritius-wide</span>
-                  )}
-                </div>
-              </ProfileCard>
+              {hasPortfolio && <WorkerPortfolioSection portfolio={portfolio} />}
 
               <ProfileCard>
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -488,10 +584,7 @@ export function WorkerProfileClient({ workerId }: { workerId: string }) {
                 )}
 
                 {reviewsLoading && reviews.length === 0 ? (
-                  <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin text-teal" aria-hidden />
-                    Loading reviews…
-                  </div>
+                  <ReviewCardSkeletonList count={3} />
                 ) : reviews.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
                     {ratingFilter != null

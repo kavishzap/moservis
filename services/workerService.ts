@@ -60,7 +60,6 @@ export type WorkerListItem = {
   areas_served: string | null
   about: string | null
   profile_image: string | null
-  portfolio_images: string[]
 
   facebook_url: string | null
   instagram_url: string | null
@@ -142,6 +141,16 @@ export type RatingBreakdownItem = {
   percentage: number
 }
 
+export type WorkerPortfolio = {
+  count: number
+  images: string[]
+}
+
+export const EMPTY_WORKER_PORTFOLIO: WorkerPortfolio = {
+  count: 0,
+  images: [],
+}
+
 export type WorkerDetails = {
   id: string
   user_id: string
@@ -162,7 +171,6 @@ export type WorkerDetails = {
   areas_served: string | null
   about: string | null
   profile_image: string | null
-  portfolio_images: string[]
 
   facebook_url: string | null
   instagram_url: string | null
@@ -217,6 +225,7 @@ export type WorkerDetails = {
 export type GetWorkerByIdResult = {
   success: boolean
   worker: WorkerDetails
+  portfolio: WorkerPortfolio
   reviews: WorkerReview[]
   reviews_pagination: {
     page: number

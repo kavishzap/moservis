@@ -12,7 +12,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme="light"
-      position="top-right"
+      position="top-center"
       offset={16}
       closeButton
       visibleToasts={4}

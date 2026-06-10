@@ -26,10 +26,10 @@ export function WorkerReviewActions({ reviewToken }: WorkerReviewActionsProps) {
   }
 
   const buttonClass =
-    "gap-2 rounded-full border-teal/35 font-semibold text-teal hover:border-ocean hover:bg-ocean hover:text-white"
+    "gap-1.5 rounded-full border-teal/35 px-3 font-semibold text-teal hover:border-ocean hover:bg-ocean hover:text-white sm:gap-2 sm:px-4"
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
       <Button
         type="button"
         variant="outline"

@@ -3,6 +3,14 @@ import {
   readEncodedPayload,
   encodedJsonResponse,
 } from "../_shared/encoded.ts"
+import {
+  MAX_PORTFOLIO_IMAGE_STORE_LENGTH,
+  normalizePortfolioImages,
+} from "../_shared/response-images.ts"
+
+const PORTFOLIO_IMAGE_PATTERN =
+  /^data:image\/(?:jpeg|jpg|png|webp|gif);base64,[A-Za-z0-9+/=]+$/
+const MAX_PORTFOLIO_IMAGES = 5
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -596,11 +604,6 @@ function validateProfileImage(value: string | null | undefined) {
   return cleaned
 }
 
-const PORTFOLIO_IMAGE_PATTERN =
-  /^data:image\/(?:jpeg|jpg|png|webp|gif);base64,[A-Za-z0-9+/=]+$/
-const MAX_PORTFOLIO_IMAGES = 5
-const MAX_PORTFOLIO_IMAGE_LENGTH = 7_000_000
-
 function validatePortfolioImages(value: unknown) {
   if (!Array.isArray(value)) {
     throw new Error("portfolio_images must be an array")
@@ -625,7 +628,7 @@ function validatePortfolioImages(value: unknown) {
       throw new Error(`portfolio_images[${index}] has invalid format`)
     }
 
-    if (cleaned.length > MAX_PORTFOLIO_IMAGE_LENGTH) {
+    if (cleaned.length > MAX_PORTFOLIO_IMAGE_STORE_LENGTH) {
       throw new Error(`portfolio_images[${index}] is too large`)
     }
 
@@ -661,11 +664,6 @@ function validateSocialUrl(value: string | null | undefined) {
   }
 
   return cleaned
-}
-
-function normalizePortfolioImages(value: unknown): string[] {
-  if (!Array.isArray(value)) return []
-  return value.filter((item): item is string => typeof item === "string")
 }
 
 function uniqueIds(values: string[]) {

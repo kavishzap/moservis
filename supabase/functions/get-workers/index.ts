@@ -3,6 +3,7 @@ import {
   readEncodedPayload,
   encodedJsonResponse,
 } from "../_shared/encoded.ts"
+import { sanitizeProfileImageForResponse } from "../_shared/response-images.ts"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -236,7 +237,7 @@ Deno.serve(async (req) => {
       district: worker.district,
       areas_served: worker.areas_served,
       about: worker.about,
-      profile_image: worker.profile_image,
+      profile_image: sanitizeProfileImageForResponse(worker.profile_image),
 
       is_verified: worker.is_verified,
 
