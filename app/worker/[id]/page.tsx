@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { id } = await params
   return {
     title: `Worker Profile | ZotServis`,
-    description: `View worker profile ${id} on ZotServis.`,
+    description: `View service provider profile ${id} on ZotServis.`,
   }
 }
 

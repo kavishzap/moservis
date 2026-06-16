@@ -52,22 +52,23 @@ const benefits = [
   {
     icon: Users,
     title: "Get Discovered",
-    description: "Be found by customers actively searching for your services",
+    description: "Be found by people actively searching for local services in Mauritius",
   },
   {
     icon: Phone,
     title: "Direct Contact",
-    description: "Receive calls and WhatsApp messages directly from customers",
+    description: "Receive calls and WhatsApp messages directly from interested public users",
   },
   {
     icon: TrendingUp,
     title: "Grow Your Business",
-    description: "Expand your customer base and increase your earnings",
+    description: "Increase your local visibility and make it easier for people to discover your services",
   },
   {
     icon: Shield,
     title: "Build Trust",
-    description: "Get verified and build your reputation with reviews",
+    description:
+      "Build a complete public profile with service details, photos, experience, and areas served",
   },
 ]
 
@@ -352,10 +353,10 @@ export default function RegisterPage() {
           <div className="mx-auto max-w-6xl">
             <div className="mb-8 text-center">
               <h1 className="mb-2 text-3xl font-bold text-foreground md:text-4xl">
-                Join as a Worker
+                Join as a Service Provider
               </h1>
               <p className="text-muted-foreground">
-                Join ZotServis and start getting more clients today
+                Join ZotServis and make your services easier to find across Mauritius
               </p>
             </div>
 
@@ -369,7 +370,7 @@ export default function RegisterPage() {
                   <div className="space-y-6 md:space-y-8">
                     <RegisterFormSection
                       title="Personal information"
-                      description="How we will reach you and how you appear on your profile."
+                      description="How we will contact you and how your public service provider profile will appear."
                     >
                       <div className="grid gap-5 sm:grid-cols-2">
                         <div className="space-y-3 sm:col-span-2">
@@ -401,7 +402,7 @@ export default function RegisterPage() {
                               <div className="min-w-0">
                                 <span className="font-semibold text-foreground">Individual</span>
                                 <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
-                                  Solo tradesperson or freelancer.
+                                  Individual service provider or freelancer.
                                 </p>
                               </div>
                             </label>
@@ -529,7 +530,7 @@ export default function RegisterPage() {
 
                     <RegisterFormSection
                       title="Service information"
-                      description="What you do and where you work in Mauritius."
+                      description="Your service categories and areas served in Mauritius."
                     >
                       <div className="grid min-w-0 gap-5 sm:grid-cols-2">
                         <div className="min-w-0 space-y-2 sm:col-span-2">
@@ -686,7 +687,7 @@ export default function RegisterPage() {
                           Subscription plan <RequiredStar />
                         </>
                       }
-                      description="Choose how you want to be billed once your profile is approved."
+                      description="Choose the plan for keeping your profile visible after your free period ends."
                       headingId="subscription-plan-heading"
                     >
                       <RadioGroup
@@ -714,7 +715,10 @@ export default function RegisterPage() {
                                   /month
                                 </span>
                               </p>
-                              <p className="text-xs text-muted-foreground">Flexible — cancel anytime.</p>
+                              <p className="text-xs text-muted-foreground">
+                                Flexible monthly plan. Cancellation affects future billing and profile
+                                visibility after the paid period.
+                              </p>
                             </div>
                           </div>
                         </label>
@@ -771,29 +775,41 @@ export default function RegisterPage() {
                           id="terms"
                           checked={agreedToTerms}
                           onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
-                          className="mt-0.5 border-teal data-[state=checked]:border-teal data-[state=checked]:bg-teal data-[state=checked]:text-white"
+                          className="mt-0.5 shrink-0 border-teal data-[state=checked]:border-teal data-[state=checked]:bg-teal data-[state=checked]:text-white"
                         />
-                        <Label htmlFor="terms" className="cursor-pointer text-sm leading-relaxed text-muted-foreground">
+                        <label
+                          htmlFor="terms"
+                          className="min-w-0 flex-1 cursor-pointer text-sm leading-relaxed text-pretty text-muted-foreground"
+                        >
                           I agree to the{" "}
                           <Link
                             href="/terms"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="font-medium text-teal underline underline-offset-2"
+                            className="inline font-medium text-teal underline underline-offset-2"
                           >
                             Terms of Service
-                          </Link>{" "}
-                          and{" "}
+                          </Link>
+                          ,{" "}
                           <Link
                             href="/privacy"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="font-medium text-teal underline underline-offset-2"
+                            className="inline font-medium text-teal underline underline-offset-2"
                           >
                             Privacy Policy
                           </Link>
+                          , and{" "}
+                          <Link
+                            href="/service-provider-agreement"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline font-medium text-teal underline underline-offset-2"
+                          >
+                            Service Provider Agreement
+                          </Link>
                           .
-                        </Label>
+                        </label>
                       </div>
                     </div>
 
@@ -811,7 +827,7 @@ export default function RegisterPage() {
                         !agreedToTerms || isSubmitting || categoriesLoading || !!categoriesError
                       }
                     >
-                      {isSubmitting ? "Submitting…" : "Register as a worker"}
+                      {isSubmitting ? "Submitting…" : "Register as a Service Provider"}
                     </Button>
                   </div>
                 </form>
@@ -824,8 +840,9 @@ export default function RegisterPage() {
                     Why Join ZotServis?
                   </h3>
                   <p className="mb-6 text-sm text-muted-foreground">
-                    List your business and receive leads from customers across Mauritius. Workers pay a simple
-                    subscription to stay visible on the platform.
+                    List your services so people across Mauritius can find and contact you directly.
+                    Service providers pay a simple subscription to keep their profile visible after the
+                    free period.
                   </p>
                   <div className="space-y-6">
                     {benefits.map((benefit) => (

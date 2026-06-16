@@ -24,16 +24,16 @@ const orgJsonLd = {
   name: "ZotServis",
   url: siteUrl,
   description:
-    "ZotServis is a Mauritius marketplace for finding local service workers such as electricians, plumbers, cleaners, gardeners and more.",
+    "ZotServis is a Mauritius directory for finding local service providers such as electricians, plumbers, cleaners, gardeners and more.",
 }
 
 export const metadata: Metadata = {
   title: "ZotServis",
   description:
-    "Find trusted workers near you in Mauritius. Electricians, plumbers, cleaners, gardeners and more.",
+    "Find and contact local service providers in Mauritius. Electricians, plumbers, cleaners, gardeners and more.",
   keywords: [
     "Mauritius",
-    "workers",
+    "service providers",
     "services",
     "electrician",
     "plumber",

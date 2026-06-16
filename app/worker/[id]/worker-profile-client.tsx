@@ -413,7 +413,7 @@ export function WorkerProfileClient({ workerId }: { workerId: string }) {
             className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-teal hover:underline"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
-            Find workers
+            Find Service Providers
           </Link>
 
           <ProfileCard className="mb-6">
@@ -434,7 +434,7 @@ export function WorkerProfileClient({ workerId }: { workerId: string }) {
                   <div className="mb-1 flex flex-wrap items-center gap-2">
                     <h1 className="text-xl font-bold text-foreground">{name}</h1>
                     {worker.is_verified && (
-                      <BadgeCheck className="h-5 w-5 text-accent" aria-label="Verified" />
+                      <BadgeCheck className="h-5 w-5 text-accent" aria-label="Listed profile" />
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">{title}</p>
@@ -473,7 +473,7 @@ export function WorkerProfileClient({ workerId }: { workerId: string }) {
                     <div className="mb-1 flex flex-wrap items-center gap-2">
                       <h1 className="text-2xl font-bold text-foreground">{name}</h1>
                       {worker.is_verified && (
-                        <BadgeCheck className="h-5 w-5 text-accent" aria-label="Verified" />
+                        <BadgeCheck className="h-5 w-5 text-accent" aria-label="Listed profile" />
                       )}
                     </div>
                     <p className="mb-3 text-base text-muted-foreground">{title}</p>

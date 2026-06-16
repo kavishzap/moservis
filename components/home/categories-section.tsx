@@ -27,7 +27,7 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
             Browse by Category
           </h3>
           <p className="text-sm text-muted-foreground sm:text-base">
-            Select a category to explore trusted local workers for your home and business.
+            Select a category to explore local service providers for home and business services across Mauritius.
           </p>
         </div>
 
@@ -35,7 +35,7 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
           <p className="text-center text-sm text-muted-foreground">
             Categories are unavailable right now.{" "}
             <Link href={buildSearchHref()} className="font-medium text-teal hover:underline">
-              Browse all workers
+              Browse all service providers
             </Link>
           </p>
         ) : (
@@ -67,7 +67,7 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
                   <MoreCategoriesIllustration />
                 </IconFrame>
                 <span className="min-w-0 flex-1 text-sm font-semibold leading-snug text-ocean">
-                  View all workers
+                  View all Service Providers
                 </span>
               </Link>
             </li>

@@ -22,8 +22,8 @@ function HeroCopyCard({ className }: { className?: string }) {
         ZotServis Community: Where Locals Help Locals
       </h1>
       <p className="mt-3 text-pretty text-base leading-relaxed text-slate/90 sm:mt-3.5 lg:text-[1.0625rem]">
-        Connect with trusted workers for your home needs in Mauritius. Find electricians,
-        plumbers, gardeners, and more in a supportive local network.
+        Find and contact local service providers for home and business services across Mauritius.
+        Browse electricians, plumbers, gardeners, cleaners, and more in one local directory.
       </p>
     </div>
   )
@@ -104,7 +104,7 @@ function HeroSearchBar({
         )}
       >
         <Link href={searchHref} className="w-full shrink-0 md:w-auto">
-          Find workers
+          Find Service Providers
         </Link>
       </Button>
     </div>

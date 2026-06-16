@@ -15,22 +15,22 @@ const benefits = [
   {
     icon: Users,
     title: "Get Discovered",
-    description: "Be found by customers looking for your services",
+    description: "Be found by people searching for your services across Mauritius",
   },
   {
     icon: Phone,
     title: "Direct Contact",
-    description: "Receive calls and WhatsApp messages directly",
+    description: "Receive direct calls and WhatsApp messages from interested public users",
   },
   {
     icon: TrendingUp,
     title: "Grow Your Business",
-    description: "Expand your customer base locally",
+    description: "Increase your local online visibility",
   },
   {
     icon: UserCheck,
     title: "Build Trust",
-    description: "Create a verified profile with reviews",
+    description: "Create a complete public profile with service details, photos, and areas served",
   },
 ]
 
@@ -46,18 +46,19 @@ export function CTASection() {
           <div className="relative grid items-start gap-10 p-8 md:grid-cols-2 md:items-center md:gap-12 md:p-12 lg:p-16">
             <div className="flex flex-col items-center text-center md:items-start md:text-left">
               <p className="mb-4 inline-flex w-fit items-center rounded-full border border-teal/40 bg-teal/15 px-4 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-white/90">
-                Are you a worker?
+                Do you offer a service?
               </p>
               <h2 className="mb-4 max-w-xl text-balance text-3xl font-bold leading-[1.15] tracking-tight text-white md:text-4xl lg:text-[2.35rem]">
                 <span className="block">
                   Join <span className="text-gold">ZotServis</span>
                 </span>
                 <span className="mt-2 block text-2xl font-semibold leading-snug text-white/90 md:text-3xl">
-                  and get more clients
+                  and make your services easier to find
                 </span>
               </h2>
               <p className="mb-4 max-w-xl text-pretty text-base leading-relaxed text-white/75 md:text-lg">
-                Register your profile and start receiving job requests from customers across Mauritius.
+                Create a public service provider profile so people across Mauritius can find and contact
+                you directly.
               </p>
               <div className="mb-8 w-full max-w-xl rounded-2xl border border-white/15 bg-white/10 p-5 text-left">
                 <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-white/85">
@@ -93,7 +94,7 @@ export function CTASection() {
                     "h-12 w-full shrink-0 rounded-full px-8 md:w-auto"
                   )}
                 >
-                  <Link href="/register">Register as a Worker</Link>
+                  <Link href="/register">Register as a Service Provider</Link>
                 </Button>
               </div>
             </div>

@@ -17,6 +17,7 @@ import {
 const legalLinks = [
   { href: "/privacy", label: "Privacy Policy" },
   { href: "/terms", label: "Terms of Service" },
+  { href: "/service-provider-agreement", label: "Service Provider Agreement" },
 ] as const
 
 const footerLinkClassName =
@@ -34,7 +35,7 @@ export function Footer() {
             <Link href="/" className="inline-flex items-center py-0.5">
               <Image
                 src="/zotserviswhitelogo.png"
-                alt="Zot Servis"
+                alt="ZotServis"
                 width={862}
                 height={289}
                 className="h-14 w-auto max-w-[min(100%,400px)] object-contain object-left sm:h-16 sm:max-w-[min(100%,480px)]"

@@ -11,13 +11,13 @@ export type SiteNavItem = {
 export const SECTION_NAV: SiteNavItem[] = [
   { key: "categories", id: "categories", label: "Category" },
   { key: "faq", id: "faq", label: "FAQ" },
-  { key: "join-worker", id: "become-a-worker", label: "Join as a Worker" },
+  { key: "join-worker", id: "become-a-worker", label: "Join as a Service Provider" },
 ]
 
 export const FIND_WORKER_NAV: SiteNavItem = {
   key: "find-worker",
   id: "find-worker",
-  label: "Find a Worker",
+  label: "Find a Service Provider",
   href: "/worker",
 }
 

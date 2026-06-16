@@ -9,9 +9,9 @@ import { SearchPageSkeleton } from "@/components/search/search-page-skeleton"
 export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
-  title: "Find Workers Across Mauritius | ZotServis",
+  title: "Find Service Providers Across Mauritius | ZotServis",
   description:
-    "Search electricians, plumbers, cleaners, gardeners and more across Mauritius. Filter by category, subcategory, and district to find trusted workers near you.",
+    "Search electricians, plumbers, cleaners, gardeners and more across Mauritius. Filter by category, subcategory, and district to find local service providers near you.",
 }
 
 export default function WorkerSearchPage() {

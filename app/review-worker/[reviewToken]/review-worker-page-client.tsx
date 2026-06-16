@@ -60,13 +60,13 @@ export function ReviewWorkerPageClient({ reviewToken }: ReviewWorkerPageClientPr
             className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-teal hover:underline"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
-            Find workers
+            Find Service Providers
           </Link>
 
           <div className="mx-auto max-w-lg rounded-2xl border border-teal/25 bg-card p-6 shadow-[0_8px_28px_rgb(30_111_138_/_0.08)] sm:p-8">
             <h1 className="text-2xl font-bold text-foreground">Leave a review</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Your feedback helps other customers find trusted workers on ZotServis.
+              Your feedback helps other people discover local service providers on ZotServis.
             </p>
 
             {loading ? (
@@ -79,7 +79,7 @@ export function ReviewWorkerPageClient({ reviewToken }: ReviewWorkerPageClientPr
                 <p className="font-medium text-foreground">Review link unavailable</p>
                 <p className="text-sm text-muted-foreground">{error}</p>
                 <Button asChild variant="outline">
-                  <Link href="/worker">Find workers</Link>
+                  <Link href="/worker">Find Service Providers</Link>
                 </Button>
               </div>
             ) : (

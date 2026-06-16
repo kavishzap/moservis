@@ -24,7 +24,7 @@ export function SearchBar({ className }: SearchBarProps) {
         onChange={(e) => setSearchQuery(e.target.value)}
         placeholder="Search by name, service, or location…"
         className="h-10 w-full min-w-0 rounded-full border-teal/30 bg-card pl-10 pr-10 text-sm shadow-sm ring-1 ring-black/[0.04] placeholder:text-xs sm:placeholder:text-sm"
-        aria-label="Search workers"
+        aria-label="Search service providers"
       />
       {searchQuery.length > 0 && (
         <button

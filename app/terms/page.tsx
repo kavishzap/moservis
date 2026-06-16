@@ -3,185 +3,429 @@ import Link from "next/link"
 import { LegalDocLayout } from "@/components/legal-doc-layout"
 import { SITE_CONTACT_EMAIL } from "@/lib/contact"
 import { SiteWhatsAppPhoneLinks } from "@/components/site-whatsapp-phone-links"
-import {
-  WORKER_MONTHLY_RS,
-  WORKER_YEARLY_RS,
-  WORKER_YEARLY_SAVINGS_PCT,
-} from "@/lib/worker-pricing"
+import { WORKER_MONTHLY_RS, WORKER_YEARLY_RS } from "@/lib/worker-pricing"
 
 export const metadata: Metadata = {
   title: "Terms of Service | ZotServis",
   description:
-    "Terms of Service for ZotServis — customers and workers using our Mauritius local services platform and worker subscriptions.",
+    "Terms of Service for ZotServis — public users and service providers using our Mauritius directory and visibility platform.",
 }
 
 export default function TermsPage() {
   const monthly = WORKER_MONTHLY_RS
   const yearly = WORKER_YEARLY_RS
-  const yearlySavePct = WORKER_YEARLY_SAVINGS_PCT
 
   return (
-    <LegalDocLayout title="Terms of Service" lastUpdated="29 March 2026">
+    <LegalDocLayout title="Terms of Service" lastUpdated="3 June 2026">
       <p>
         These Terms of Service (&quot;Terms&quot;) govern your access to and use of the ZotServis website,
-        applications, and related services (collectively, the &quot;Platform&quot;) operated in Mauritius. By
-        using the Platform, you agree to these Terms. If you do not agree, do not use ZotServis.
+        applications, pages, profiles, contact features, and related services (collectively, the
+        &quot;Platform&quot;) operated in Mauritius.
+      </p>
+      <p>
+        By accessing or using ZotServis, you agree to these Terms. If you do not agree, you should not use
+        the Platform.
       </p>
 
       <h2>1. Who we are</h2>
       <p>
-        <strong>ZotServis</strong> (&quot;we&quot;, &quot;us&quot;) is an online marketplace that helps people in{" "}
-        <strong>Mauritius</strong> find and contact local service providers (&quot;Workers&quot;) for jobs such
-        as electrical work, plumbing, cleaning, painting, gardening, carpentry, and similar services. We provide
-        discovery, profiles, and contact tools. We are <strong>not</strong> a party to contracts between Customers
-        and Workers for the actual work performed.
+        ZotServis is an online directory and visibility platform that allows independent service providers in
+        Mauritius to create public profiles so that members of the public can find and contact them directly.
+      </p>
+      <p>
+        ZotServis is not a recruitment agency, employment agency, booking platform, payment platform,
+        contractor, employer, agent, representative, or manager of any service provider.
+      </p>
+      <p>
+        ZotServis does not recruit, interview, select, employ, place, supervise, recommend, assign, control,
+        or manage service providers. ZotServis does not arrange employment or work contracts between public
+        users and service providers.
+      </p>
+      <p>
+        Any communication, negotiation, booking, quotation, payment, service arrangement, meeting, or work
+        performed is strictly between the public user and the service provider.
       </p>
 
       <h2>2. Definitions</h2>
+      <p>In these Terms:</p>
       <ul>
         <li>
-          <strong>Customer</strong> — anyone who uses the Platform to search for, view, or contact Workers.
+          <strong>&quot;Public User&quot;</strong> means any person who browses, searches, views, contacts, or
+          interacts with service providers through or because of the Platform.
         </li>
         <li>
-          <strong>Worker</strong> — a service provider who registers a profile on the Platform to be discoverable
-          by Customers.
+          <strong>&quot;Service Provider&quot;</strong> means an independent person, professional, freelancer,
+          business, or organisation that registers or is listed on the Platform to display services and contact
+          details.
         </li>
         <li>
-          <strong>Subscription</strong> — the paid plan that Workers may purchase to keep their profile visible
-          and active on the Platform, as described on our site and at registration.
+          <strong>&quot;Profile&quot;</strong> means the public listing page or information displayed about a
+          Service Provider.
         </li>
         <li>
-          <strong>User</strong> — any Customer or Worker (or visitor) using the Platform.
+          <strong>&quot;Subscription&quot;</strong> means the paid visibility plan that a Service Provider may
+          choose after any free promotional period.
+        </li>
+        <li>
+          <strong>&quot;User&quot;</strong> means any Public User, Service Provider, visitor, or other person
+          using the Platform.
         </li>
       </ul>
 
-      <h2>3. Eligibility</h2>
+      <h2>3. Platform-only role</h2>
+      <p>ZotServis provides online visibility and contact access only.</p>
+      <p>ZotServis does not:</p>
+      <ul>
+        <li>employ Service Providers;</li>
+        <li>recruit workers for employers or customers;</li>
+        <li>act as a recruitment agency;</li>
+        <li>guarantee work, customers, leads, income, bookings, enquiries, or payments;</li>
+        <li>accept bookings on behalf of Service Providers;</li>
+        <li>collect or hold customer payments for Service Providers;</li>
+        <li>take commission from Service Providers&apos; customer payments;</li>
+        <li>supervise, control, or inspect work done by Service Providers;</li>
+        <li>
+          guarantee the identity, skills, licences, qualifications, behaviour, reliability, pricing,
+          availability, safety, or quality of any Service Provider;
+        </li>
+        <li>become a party to any agreement between a Public User and a Service Provider.</li>
+      </ul>
       <p>
-        You must be able to enter a binding contract under Mauritian law. If you use the Platform on behalf of a
-        business, you represent that you have authority to bind that business. Workers must provide accurate
-        identity and business information where requested for verification or display.
+        Any contract or arrangement is made directly between the Public User and the Service Provider outside
+        ZotServis.
       </p>
 
-      <h2>4. Customers</h2>
-      <h3>4.1 Free use</h3>
+      <h2>4. Public Users</h2>
+      <h3>4.1 Free public access</h3>
       <p>
-        Searching the directory, viewing Worker profiles, and using contact features made available on the
-        Platform (for example phone or WhatsApp links) are offered to Customers{" "}
-        <strong>without a subscription fee to ZotServis</strong>, unless we introduce a separate paid Customer
-        product in the future (we will notify you before any such fee applies to you).
+        Public Users may browse the Platform, view Service Provider profiles, and use available contact links
+        such as phone, WhatsApp, email, website, or social media links free of charge, unless ZotServis
+        introduces a separate paid public feature in the future.
       </p>
-      <h3>4.2 Your responsibilities</h3>
+      <h3>4.2 Public User responsibility</h3>
+      <p>
+        Public Users are fully responsible for their own decisions when contacting, meeting, booking, paying, or
+        working with a Service Provider.
+      </p>
+      <p>Before agreeing to any service, Public Users should make their own checks, including where relevant:</p>
       <ul>
-        <li>Use the Platform lawfully and respectfully.</li>
+        <li>confirming the identity of the Service Provider;</li>
         <li>
-          Negotiate scope, price, and terms of work directly with the Worker. ZotServis does not guarantee quotes,
-          quality, timing, or outcomes.
+          checking experience, references, qualifications, licences, permits, insurance, or business
+          registration where applicable;
         </li>
         <li>
-          Do not misuse contact details, harass Workers, or use the Platform for spam, fraud, or illegal activity.
+          agreeing the scope of work, price, timing, materials, payment method, cancellation terms, and safety
+          requirements directly with the Service Provider;
+        </li>
+        <li>keeping written proof of important discussions, quotations, payments, and agreements;</li>
+        <li>using safe meeting practices, especially when meeting someone for the first time;</li>
+        <li>not sharing unnecessary personal, financial, or sensitive information.</li>
+      </ul>
+      <p>
+        ZotServis is not responsible for any loss, damage, injury, theft, fraud, poor workmanship, delay,
+        failed service, payment dispute, misconduct, harassment, or other issue arising between a Public User
+        and a Service Provider.
+      </p>
+      <h3>4.3 No guarantee</h3>
+      <p>
+        Information on Service Provider profiles is submitted by Service Providers or collected for listing
+        purposes. ZotServis may review, moderate, edit, hide, or remove profiles, but this does not mean that
+        ZotServis verifies or guarantees the information.
+      </p>
+      <p>Public Users must not rely only on a ZotServis profile when making a decision.</p>
+      <h3>4.4 Public User conduct</h3>
+      <p>Public Users must not:</p>
+      <ul>
+        <li>harass, threaten, abuse, discriminate against, or misuse the contact details of Service Providers;</li>
+        <li>use the Platform for spam, scams, fraud, illegal activity, or misleading messages;</li>
+        <li>impersonate another person or business;</li>
+        <li>attempt to bypass the security or proper operation of the Platform;</li>
+        <li>
+          use information from the Platform for mass marketing, scraping, resale, or unauthorised databases.
         </li>
       </ul>
 
-      <h2>5. Workers</h2>
-      <h3>5.1 Profiles and visibility</h3>
+      <h2>5. Service Providers</h2>
+      <h3>5.1 Independent status</h3>
+      <p>Service Providers are independent from ZotServis.</p>
       <p>
-        By registering as a Worker, you create a public-facing profile that may include your services, areas
-        covered, and contact information you choose to display. You are responsible for keeping that information
-        accurate and up to date.
+        A Service Provider is not an employee, worker, agent, partner, franchisee, contractor, representative,
+        or legal delegate of ZotServis.
       </p>
-      <h3>5.2 Worker subscription (fees)</h3>
       <p>
-        To remain <strong>listed and visible</strong> on the Platform, Workers pay a subscription in Mauritian
-        Rupees (Rs), as shown on the registration and pricing areas of the site. Unless stated otherwise at
-        checkout, the following structure applies:
+        Service Providers are responsible for how they communicate with Public Users, how they price their
+        services, how they perform their work, and how they handle customers, payments, disputes, taxes,
+        licences, insurance, and legal obligations.
       </p>
+      <p>
+        Service Providers must also comply with the{" "}
+        <Link href="/service-provider-agreement">Service Provider Agreement</Link>.
+      </p>
+      <h3>5.2 Registration and profile information</h3>
+      <p>
+        By registering or submitting information for a profile, the Service Provider confirms that all
+        information provided is accurate, lawful, up to date, and not misleading.
+      </p>
+      <p>
+        Service Providers are responsible for ensuring that their phone number, WhatsApp number, email address,
+        social media links, service area, service category, description, photos, documents, prices, and other
+        displayed information are correct.
+      </p>
+      <p>
+        ZotServis is not responsible if a Public User cannot contact a Service Provider because the Service
+        Provider submitted incorrect, outdated, incomplete, or inactive contact details.
+      </p>
+      <h3>5.3 Public display of profile</h3>
+      <p>
+        Service Providers understand and agree that their profile information may be publicly visible on Zot
+        Servis and may be indexed or displayed by search engines, social media previews, and other online
+        services.
+      </p>
+      <p>This may include, depending on what is submitted or approved for display:</p>
+      <ul>
+        <li>name or business name;</li>
+        <li>service category and service description;</li>
+        <li>district, area, or service location;</li>
+        <li>phone number, WhatsApp number, email address, website, or social media links;</li>
+        <li>profile photo, work images, logo, or other uploaded content.</li>
+      </ul>
+      <p>
+        Service Providers must not upload personal data or images of other people unless they have the right and
+        permission to do so.
+      </p>
+      <h3>5.4 Free period and paid visibility</h3>
+      <p>
+        Service Providers receive a free visibility period of three months starting from the date of
+        registration, unless ZotServis states a different promotional period in writing.
+      </p>
+      <p>After the free period ends, the Service Provider may choose one of the following visibility plans:</p>
       <ul>
         <li>
-          <strong>Monthly:</strong> Rs {monthly} per month.
+          <strong>Monthly plan:</strong> Rs {monthly} per month.
         </li>
         <li>
-          <strong>Yearly:</strong> Rs {yearly.toLocaleString("en-MU")} per year (approximately {yearlySavePct}%
-          savings vs twelve monthly payments at the current monthly rate).
+          <strong>Yearly plan:</strong> Rs {yearly.toLocaleString("en-MU")} per year.
         </li>
       </ul>
       <p>
-        Fees are <strong>for Platform access and visibility</strong>, not for individual job leads. We do not
-        guarantee a minimum number of enquiries, jobs, or revenue. Payment methods, billing cycles, taxes, and any
-        promotional pricing will be shown at the time you subscribe.
+        These fees are for profile visibility and access to the Platform only. They are not commission,
+        recruitment fees, job placement fees, or payment for customer leads.
       </p>
-      <h3>5.3 Renewal and cancellation</h3>
       <p>
-        Subscriptions renew according to the plan you choose (monthly or yearly) until you cancel through the
-        account or billing flow we provide, or as described in your payment confirmation. If you cancel, your
-        profile may remain visible until the end of the paid period; after that, visibility may be removed unless
-        you renew.
+        ZotServis does not guarantee that a Service Provider will receive enquiries, customers, bookings,
+        jobs, revenue, profit, or any specific result from being listed.
       </p>
-      <h3>5.4 Refunds</h3>
+      <h3>5.5 End of free period</h3>
       <p>
-        Refund rules depend on what we display at purchase and applicable law. Unless we state a cooling-off or
-        refund policy for your specific transaction, subscription fees are generally{" "}
-        <strong>non-refundable</strong> for partial periods already started. Contact us if you believe a billing
-        error occurred.
+        If a Service Provider does not choose and pay for a visibility plan after the free period, ZotServis may
+        hide, suspend, archive, or remove the Service Provider profile from public view.
       </p>
-      <h3>5.5 Conduct and compliance</h3>
       <p>
-        Workers must perform services in compliance with Mauritian law, hold any licences or insurance where
-        required for their trade, and not misrepresent qualifications. You indemnify us against claims arising from
-        your work, except where prohibited by law.
+        ZotServis may also contact the Service Provider before or after the free period ends, but ZotServis is
+        not required to keep a profile visible without an active plan.
+      </p>
+      <h3>5.6 Payments and refunds</h3>
+      <p>
+        Subscription fees, billing periods, accepted payment methods, and any applicable taxes will be shown at
+        the time of payment or communicated by ZotServis.
+      </p>
+      <p>
+        Unless ZotServis states otherwise in writing, subscription payments are generally non-refundable once
+        the paid visibility period has started, except where required by applicable law or where ZotServis
+        confirms that a billing error occurred.
+      </p>
+      <p>
+        If a payment fails, is reversed, or is not received, ZotServis may suspend or remove the profile
+        visibility.
+      </p>
+      <h3>5.7 Service Provider legal compliance</h3>
+      <p>
+        Service Providers are responsible for complying with all laws, regulations, trade requirements, tax
+        obligations, licences, permits, professional rules, insurance requirements, and safety standards that
+        apply to their services.
+      </p>
+      <p>
+        Service Providers must not claim qualifications, licences, approvals, experience, prices, offers, or
+        abilities that they do not have.
+      </p>
+      <p>
+        ZotServis may request supporting information, edit a profile, reject a profile, or remove a profile,
+        but ZotServis is not responsible for verifying every claim made by a Service Provider.
+      </p>
+      <h3>5.8 Service Provider conduct</h3>
+      <p>Service Providers must not:</p>
+      <ul>
+        <li>provide false, misleading, illegal, offensive, discriminatory, or harmful information;</li>
+        <li>
+          use stolen images, copyrighted content, fake reviews, fake qualifications, or unauthorised
+          third-party material;
+        </li>
+        <li>behave abusively, dishonestly, dangerously, or unlawfully towards Public Users;</li>
+        <li>use ZotServis to promote illegal services or activities;</li>
+        <li>attempt to collect payments in a fraudulent or misleading way;</li>
+        <li>
+          represent that they are employed, endorsed, approved, guaranteed, or managed by ZotServis unless Zot
+          Servis expressly confirms this in writing.
+        </li>
+      </ul>
+      <h3>5.9 Disputes with Public Users</h3>
+      <p>All disputes between a Public User and a Service Provider are strictly between those parties.</p>
+      <p>
+        This includes disputes about price, payment, deposits, refunds, timing, attendance, cancellation,
+        materials, quality of work, damage, loss, injury, behaviour, communication, or any other matter.
+      </p>
+      <p>
+        ZotServis may, at its discretion, receive complaints, review listings, remove profiles, or restrict
+        access to the Platform. However, ZotServis is not required to mediate, resolve, compensate, enforce,
+        or participate in disputes between Public Users and Service Providers.
       </p>
 
-      <h2>6. Prohibited conduct (all Users)</h2>
-      <p>You must not:</p>
+      <h2>6. Content and intellectual property</h2>
+      <p>
+        The ZotServis name, logo, website design, platform content, branding, layout, software, and
+        materials created by ZotServis belong to ZotServis or its licensors.
+      </p>
+      <p>
+        Service Providers retain ownership of content they submit, such as descriptions, photos, logos, and
+        profile materials, but they grant ZotServis a non-exclusive, worldwide, royalty-free licence to host,
+        store, display, reproduce, edit for formatting, promote, and share that content for the purpose of
+        operating, marketing, and improving the Platform.
+      </p>
+      <p>Service Providers confirm that they have the rights and permissions needed to submit their content.</p>
+
+      <h2>7. Moderation and removal</h2>
+      <p>
+        ZotServis may, at any time and without liability, refuse, edit, hide, suspend, or remove any profile,
+        content, account, or access where ZotServis believes that:
+      </p>
       <ul>
-        <li>Violate any law or third-party rights.</li>
-        <li>Upload malware, scrape the Platform in breach of these Terms, or attempt to bypass security.</li>
-        <li>Impersonate others or create fake listings.</li>
-        <li>Use the Platform to discriminate unlawfully or to harm others.</li>
+        <li>information is false, misleading, outdated, incomplete, or unlawful;</li>
+        <li>the User has breached these Terms;</li>
+        <li>the listing may create legal, safety, reputational, technical, or operational risk;</li>
+        <li>the User has misused the Platform;</li>
+        <li>payment has not been made where required;</li>
+        <li>removal is necessary to protect ZotServis, Public Users, Service Providers, or third parties.</li>
+      </ul>
+      <p>ZotServis is not required to publish every submitted profile.</p>
+
+      <h2>8. No emergency service</h2>
+      <p>ZotServis is not an emergency response service.</p>
+      <p>
+        Public Users should not rely on ZotServis for urgent, dangerous, medical, police, fire, rescue,
+        electrical hazard, gas hazard, or other emergency situations. In an emergency, contact the appropriate
+        emergency services or competent authorities.
+      </p>
+
+      <h2>9. Disclaimers</h2>
+      <p>The Platform is provided on an &quot;as is&quot; and &quot;as available&quot; basis.</p>
+      <p>To the fullest extent permitted by Mauritian law, ZotServis does not give any warranty or guarantee that:</p>
+      <ul>
+        <li>the Platform will always be available, uninterrupted, secure, or error-free;</li>
+        <li>Service Provider profiles are accurate, complete, verified, lawful, safe, or up to date;</li>
+        <li>Public Users will find a suitable Service Provider;</li>
+        <li>Service Providers will receive customers, enquiries, bookings, jobs, income, or results;</li>
+        <li>
+          any service arranged outside the Platform will be safe, lawful, satisfactory, timely, or properly
+          performed.
+        </li>
       </ul>
 
-      <h2>7. Intellectual property</h2>
+      <h2>10. Limitation of liability</h2>
       <p>
-        The Platform, branding, and content we create are owned by ZotServis or our licensors. You receive a
-        limited, revocable licence to use the Platform for its intended purpose. You retain rights to content you
-        submit; you grant us a licence to host, display, and promote it on the Platform.
+        To the maximum extent permitted by Mauritian law, ZotServis and its owners, directors, team members,
+        partners, contractors, and affiliates will not be liable for any indirect, incidental, special,
+        consequential, punitive, or economic loss, including loss of profit, loss of revenue, loss of data, loss
+        of opportunity, loss of goodwill, or business interruption.
+      </p>
+      <p>
+        ZotServis will not be liable for any claim, loss, damage, injury, theft, fraud, misconduct, poor
+        workmanship, delay, non-payment, overcharging, cancellation, accident, harassment, or dispute arising
+        from communications, meetings, payments, services, or arrangements between Public Users and Service
+        Providers.
+      </p>
+      <p>
+        Where ZotServis cannot legally exclude liability, ZotServis&apos; total liability for claims relating
+        to the Platform will be limited to the amount paid by the User to ZotServis in the twelve months before
+        the claim, or Rs 5,000, whichever is greater, unless a different limit is required by law.
+      </p>
+      <p>
+        Nothing in these Terms excludes or limits liability where it cannot be excluded or limited under
+        applicable law.
       </p>
 
-      <h2>8. Disclaimers</h2>
+      <h2>11. Indemnity</h2>
       <p>
-        The Platform is provided <strong>&quot;as is&quot;</strong> to the fullest extent permitted by law. We do
-        not warrant uninterrupted or error-free operation. We do not employ Workers and are{" "}
-        <strong>not responsible</strong> for the quality, safety, legality, or timeliness of work performed by
-        Workers, or for disputes between Customers and Workers.
+        To the fullest extent permitted by law, you agree to indemnify and hold harmless ZotServis and its
+        owners, directors, team members, partners, contractors, and affiliates from claims, losses, damages,
+        liabilities, costs, and expenses arising from:
+      </p>
+      <ul>
+        <li>your breach of these Terms;</li>
+        <li>your misuse of the Platform;</li>
+        <li>content or information you submit;</li>
+        <li>services you offer, request, arrange, pay for, or perform;</li>
+        <li>disputes between you and another User;</li>
+        <li>your breach of law, rights, licences, permits, tax obligations, or third-party rights.</li>
+      </ul>
+
+      <h2>12. Privacy</h2>
+      <p>
+        Our <Link href="/privacy">Privacy Policy</Link> explains how we collect, use, store, share, and protect
+        personal data.
+      </p>
+      <p>
+        By using the Platform, you agree that ZotServis may process personal data as described in the Privacy
+        Policy.
+      </p>
+      <p>Service Providers understand that profile information submitted for public listing may be displayed publicly.</p>
+
+      <h2>13. Changes to the Platform</h2>
+      <p>
+        ZotServis may update, modify, suspend, limit, replace, or discontinue any part of the Platform at any
+        time.
+      </p>
+      <p>
+        ZotServis may also change categories, profile features, contact options, pricing, visibility rules, and
+        subscription options. Where required, material changes to paid subscription terms will be communicated
+        before they affect existing paid plans.
       </p>
 
-      <h2>9. Limitation of liability</h2>
+      <h2>14. Changes to these Terms</h2>
       <p>
-        To the maximum extent permitted by Mauritian law, ZotServis and its team will not be liable for indirect,
-        incidental, special, or consequential damages, or for loss of profits or data, arising from your use of the
-        Platform. Our total liability for any claim relating to the Platform is limited to the amount you paid us
-        in the twelve months before the claim (if any), or Rs 5,000, whichever is greater, except where liability
-        cannot be limited by law.
+        ZotServis may update these Terms from time to time by posting a new version on the Platform and
+        updating the &quot;Last updated&quot; date.
+      </p>
+      <p>
+        Your continued use of the Platform after updated Terms are posted means you accept the updated Terms,
+        where permitted by law.
+      </p>
+      <p>
+        For Service Providers, continued use of a profile or subscription after changes are posted or
+        communicated means acceptance of the updated Terms.
       </p>
 
-      <h2>10. Governing law</h2>
+      <h2>15. Governing law and jurisdiction</h2>
+      <p>These Terms are governed by the laws of the Republic of Mauritius.</p>
       <p>
-        These Terms are governed by the laws of the <strong>Republic of Mauritius</strong>. Courts of Mauritius
-        have jurisdiction, subject to mandatory consumer protections where they apply.
+        The courts of Mauritius shall have jurisdiction over disputes relating to these Terms or the Platform,
+        subject to any mandatory rights or protections that apply under Mauritian law.
       </p>
 
-      <h2>11. Changes</h2>
+      <h2>16. Contact</h2>
+      <p>For questions about these Terms, contact ZotServis at:</p>
+      <ul>
+        <li>
+          Email: <a href={`mailto:${SITE_CONTACT_EMAIL}`}>{SITE_CONTACT_EMAIL}</a>
+        </li>
+        <li>
+          WhatsApp: <SiteWhatsAppPhoneLinks />
+        </li>
+        <li>Location: Mauritius</li>
+      </ul>
       <p>
-        We may update these Terms by posting a new version on this page and updating the &quot;Last updated&quot;
-        date. Continued use after changes constitutes acceptance where permitted by law. Material changes to
-        subscription terms will be communicated as required.
-      </p>
-
-      <h2>12. Contact</h2>
-      <p>
-        Questions about these Terms:{" "}
-        <a href={`mailto:${SITE_CONTACT_EMAIL}`}>{SITE_CONTACT_EMAIL}</a>. WhatsApp: <SiteWhatsAppPhoneLinks />.
-        See also our{" "}
-        <Link href="/privacy">Privacy Policy</Link>.
+        See also our <Link href="/privacy">Privacy Policy</Link> and{" "}
+        <Link href="/service-provider-agreement">Service Provider Agreement</Link>.
       </p>
     </LegalDocLayout>
   )

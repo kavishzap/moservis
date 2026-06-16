@@ -79,12 +79,14 @@ export function SearchResultsSummary({
           <span className="hidden min-[480px]:inline"> of </span>
           <span className="min-[480px]:hidden text-muted-foreground">/</span>{" "}
           <span className="font-medium text-foreground">{totalItems}</span>
-          <span className="hidden sm:inline">{totalItems === 1 ? " worker" : " workers"}</span>
+          <span className="hidden sm:inline">
+            {totalItems === 1 ? " service provider" : " service providers"}
+          </span>
         </>
       ) : (
         <>
           <span className="font-medium text-foreground">0</span>
-          <span className="hidden sm:inline"> workers</span>
+          <span className="hidden sm:inline"> service providers</span>
         </>
       )}
       {filteredFromTotal && workersTotal != null && totalItems > 0 && (
@@ -228,7 +230,7 @@ export function SearchPagination({
             {rangeStart}–{rangeEnd}
           </span>{" "}
           of <span className="font-medium text-foreground">{totalItems}</span>
-          {totalItems === 1 ? " worker" : " workers"}
+          {totalItems === 1 ? " service provider" : " service providers"}
           {totalPages > 1 && (
             <>
               {" "}

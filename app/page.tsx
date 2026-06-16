@@ -10,9 +10,9 @@ import { FAQSection } from "@/components/home/faq-section"
 import { getServiceCategories } from "@/services/categoryService"
 
 export const metadata: Metadata = {
-  title: "Find Trusted Workers in Mauritius | ZotServis",
+  title: "Find Local Service Providers in Mauritius | ZotServis",
   description:
-    "Find electricians, plumbers, cleaners, gardeners and more across Mauritius. Browse worker cards and contact them directly by phone or WhatsApp.",
+    "Find and contact local service providers for home and business services across Mauritius. Browse electricians, plumbers, gardeners, cleaners, and more in one local directory.",
 }
 
 export default async function HomePage() {

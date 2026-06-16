@@ -182,7 +182,7 @@ export function Navbar() {
         <Link href="/" className="flex shrink-0 items-center py-0.5" onClick={goHome} aria-label="ZotServis home">
           <Image
             src="/zotservisbluelogo.png"
-            alt="Zot Servis"
+            alt="ZotServis"
             width={862}
             height={289}
             className="h-9 w-auto max-w-[min(240px,52vw)] object-contain object-left sm:h-10 sm:max-w-[min(300px,58vw)] lg:h-11 lg:max-w-[360px]"
@@ -213,7 +213,7 @@ export function Navbar() {
             className={cn(goldButtonClassName, "shrink-0 rounded-full")}
             asChild
           >
-            <Link href="/worker">Find a Worker</Link>
+            <Link href="/worker">Find a Service Provider</Link>
           </Button>
         </div>
 
@@ -250,7 +250,7 @@ export function Navbar() {
               <Link href="/" className="flex min-w-0 items-center py-0.5" onClick={goHome} aria-label="ZotServis home">
                 <Image
                   src="/zotservisbluelogo.png"
-                  alt="Zot Servis"
+                  alt="ZotServis"
                   width={862}
                   height={289}
                   className="h-10 w-auto max-w-[min(280px,62vw)] object-contain object-left"
@@ -287,7 +287,7 @@ export function Navbar() {
                   asChild
                 >
                   <Link href="/worker" onClick={close}>
-                    Find a Worker
+                    Find a Service Provider
                   </Link>
                 </Button>
               </div>

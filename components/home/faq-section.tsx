@@ -12,25 +12,29 @@ import { sectionScrollMargin, siteContainer } from "@/lib/site-layout"
 
 const faqs = [
   {
-    question: "How do I find a worker?",
-    answer: "Simply use our search bar to enter the service you need and your location. You can also browse by category. Once you find a worker you like, you can contact them directly via phone or WhatsApp.",
+    question: "How do I find a service provider?",
+    answer:
+      "Use the search bar to choose a service category and district, or browse by category on the homepage. When you find a service provider that fits your needs, you can contact them directly by phone or WhatsApp.",
   },
   {
-    question: "How do I contact a worker?",
-    answer: "Each worker profile has a Call Now and WhatsApp button. Simply click on either to contact them directly. There's no middleman - you deal directly with the worker.",
+    question: "How do I contact a service provider?",
+    answer:
+      "Each public profile includes Call now and WhatsApp options. Use either to contact the service provider directly. ZotServis does not handle bookings or payments.",
   },
   {
-    question: "How can I register as a worker?",
-    answer: "Click on 'Join as a Worker' in the navigation menu and fill out the registration form. You'll need to provide your contact details, service area, and some information about your experience. Once verified, your profile will be visible to customers.",
+    question: "How can I register as a service provider?",
+    answer:
+      "Click Join as a Service Provider in the navigation menu and complete the registration form with your contact details, service categories, areas served, and experience. Once your profile is reviewed, it can be published in the directory.",
   },
   {
     question: "Is ZotServis free?",
     answer:
-      "Yes! ZotServis is completely free for customers to use. Workers subscribe to list their profile and receive job requests: Rs 100 per month, or Rs 1,000 per year (about 17% less than paying monthly).",
+      "Yes. ZotServis is free for public users to search and contact service providers. Service providers pay a simple subscription to keep their profile visible after the free period: Rs 100 per month, or Rs 1,000 per year (about 17% less than paying monthly).",
   },
   {
-    question: "Are workers verified?",
-    answer: "We verify all workers through a review process. Verified workers display a verification badge on their profile. We also show customer reviews and ratings to help you make informed decisions.",
+    question: "Are service provider profiles reviewed?",
+    answer:
+      "Service provider profiles may be reviewed for completeness before being published on ZotServis. Profile status is shown where applicable, along with service details, photos, experience, and areas served.",
   },
 ]
 
@@ -70,7 +74,7 @@ export function FAQSection() {
           <div className="relative mx-auto w-full max-w-sm lg:mx-0 lg:max-w-none lg:pt-1">
             <Image
               src="/zotservismap.png"
-              alt="Map of Mauritius with local workers ready to help across the island"
+              alt="Map of Mauritius showing local service providers across the island"
               width={640}
               height={640}
               className="h-auto w-full rounded-2xl"

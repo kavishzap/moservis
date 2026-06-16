@@ -41,7 +41,7 @@ export function SearchPageSkeleton({ cardCount = 4 }: { cardCount?: number }) {
     <div
       className={`${siteContainer} py-6 sm:py-8`}
       aria-busy="true"
-      aria-label="Loading workers"
+      aria-label="Loading service providers"
     >
       <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
         <SearchFiltersSidebarSkeleton />

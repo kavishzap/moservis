@@ -137,7 +137,7 @@ function SearchResultsInner() {
       setTotalPages(Math.max(1, result.pagination.total_pages))
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Could not load workers."
+        err instanceof Error ? err.message : "Could not load service providers."
       setError(message)
       setWorkers([])
       setTotalItems(0)
@@ -226,18 +226,20 @@ function SearchResultsInner() {
             <WorkerCardSkeletonList count={pageSize} />
           ) : error ? (
             <div className="rounded-2xl border border-destructive/30 bg-destructive/5 px-6 py-12 text-center">
-              <p className="font-medium text-foreground">Could not load workers</p>
+              <p className="font-medium text-foreground">Could not load service providers</p>
               <p className="mt-2 text-sm text-muted-foreground">{error}</p>
             </div>
           ) : workers.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-teal/30 bg-muted/30 px-6 py-12 text-center">
               <p className="font-medium text-foreground">
-                {hasActiveFilters ? "No workers match your search" : "No workers found"}
+                {hasActiveFilters
+                  ? "No service providers match your search"
+                  : "No service providers found"}
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
                 {hasActiveFilters
-                  ? "Try a different search term, category, district, rating, verification, or clear filters."
-                  : "Check back soon — new workers join ZotServis regularly."}
+                  ? "Try a different search term, category, district, rating, profile status, or clear filters."
+                  : "Check back soon — new service providers join ZotServis regularly."}
               </p>
               {hasActiveFilters ? (
                 <Button

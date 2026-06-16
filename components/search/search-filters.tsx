@@ -215,20 +215,20 @@ function VerifiedFilterField({ className }: { className?: string }) {
   const { verifiedOnly, setVerifiedOnly } = useSearchFilters()
 
   const options: { value: boolean; label: string }[] = [
-    { value: false, label: "All workers" },
-    { value: true, label: "Verified only" },
+    { value: false, label: "All service providers" },
+    { value: true, label: "Listed profiles" },
   ]
 
   return (
     <div className={cn("min-w-0", className)}>
       <h3 className="mb-3 flex items-center gap-2 text-base font-semibold text-foreground">
         <BadgeCheck className="h-4 w-4 text-accent" aria-hidden />
-        Verification
+        Profile status
       </h3>
       <div
         className="flex flex-wrap gap-2"
         role="group"
-        aria-label="Filter workers by verification status"
+        aria-label="Filter service providers by profile status"
       >
         {options.map(({ value, label }) => {
           const isActive = verifiedOnly === value
@@ -274,7 +274,7 @@ function RatingFilterField({ className }: { className?: string }) {
       <div
         className="flex flex-wrap gap-2"
         role="group"
-        aria-label="Filter workers by minimum rating"
+        aria-label="Filter service providers by minimum rating"
       >
         {options.map(({ rating, label }) => {
           const isActive = selectedMinRating === rating

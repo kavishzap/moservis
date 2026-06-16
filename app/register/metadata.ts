@@ -1,8 +1,7 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Join as a Worker on ZotServis | Get More Clients in Mauritius",
+  title: "Join as a Service Provider | ZotServis",
   description:
-    "Register as a worker on ZotServis and connect with people across Mauritius who are actively searching for electricians, plumbers, cleaners, gardeners and other services. List your services, choose your district and start receiving calls and WhatsApp leads.",
+    "Register as a service provider on ZotServis and create a public profile so people across Mauritius can find and contact you directly for electricians, plumbers, cleaners, gardeners and other services.",
 }
-

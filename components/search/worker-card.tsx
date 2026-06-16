@@ -40,7 +40,7 @@ export function WorkerCard({ worker }: WorkerCardProps) {
               {worker.verified && (
                 <BadgeCheck
                   className="h-5 w-5 shrink-0 text-accent"
-                  aria-label="Verified worker"
+                  aria-label="Listed profile"
                 />
               )}
               {worker.totalReviews > 0 && (

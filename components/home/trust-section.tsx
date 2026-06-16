@@ -20,8 +20,8 @@ import {
 } from "@/components/icons/illustrative/trust-icons"
 
 const trustSignals = [
-  { icon: BadgeCheck, label: "Verified worker profiles" },
-  { icon: Star, label: "Real customer reviews" },
+  { icon: BadgeCheck, label: "Public service provider profiles" },
+  { icon: Star, label: "Profile details and provider information" },
   { icon: MessageCircle, label: "Direct WhatsApp & call" },
   { icon: MapPin, label: "Coverage across Mauritius" },
 ] as const
@@ -29,11 +29,12 @@ const trustSignals = [
 const trustItems = [
   {
     Illustration: TrustedExpertsIllustration,
-    title: "Trusted Local Experts",
-    description: "Every worker profile is reviewed before going live on ZotServis.",
+    title: "Local Service Providers",
+    description:
+      "Service provider profiles may be reviewed for completeness before being published on ZotServis.",
     highlights: [
-      "Identity and service details checked",
-      "Verification badge on approved profiles",
+      "Basic profile details reviewed for completeness",
+      "Profile status shown where applicable",
       "Portfolio and experience visible upfront",
     ],
   },
@@ -42,7 +43,7 @@ const trustItems = [
     title: "Community Focus",
     description: "Built for Mauritian households, tradespeople, and small businesses.",
     highlights: [
-      "Workers listed by district and service area",
+      "Service providers listed by district and service area",
       "Supports local skills and livelihoods",
       "Categories from home repair to professional services",
     ],
@@ -50,11 +51,12 @@ const trustItems = [
   {
     Illustration: SimpleTransparentIllustration,
     title: "Simple & Transparent",
-    description: "No hidden platform fees for customers — you deal directly with the worker.",
+    description:
+      "Free for public users to browse — you contact service providers directly outside ZotServis.",
     highlights: [
-      "Free to search and contact workers",
-      "Clear subscription pricing for workers only",
-      "Honest ratings from completed jobs",
+      "Free to search and contact service providers",
+      "Clear subscription pricing for service providers only",
+      "Clear profile information from listed service providers",
     ],
   },
 ] as const
@@ -64,19 +66,22 @@ const howItWorks = [
     step: "1",
     icon: Search,
     title: "Search locally",
-    description: "Filter by category, district, ratings, or verified workers.",
+    description:
+      "Filter by category, district, and service area to find relevant local providers.",
   },
   {
     step: "2",
     icon: UserRound,
     title: "Compare profiles",
-    description: "View reviews, portfolio photos, experience, and areas served.",
+    description:
+      "View profile details, photos, experience, categories, and areas served.",
   },
   {
     step: "3",
     icon: Phone,
     title: "Contact directly",
-    description: "Call or WhatsApp the worker yourself — no middleman.",
+    description:
+      "Call or WhatsApp the service provider directly — ZotServis does not handle bookings or payments.",
   },
 ] as const
 
@@ -120,8 +125,8 @@ export function TrustSection() {
             Why Choose Our Community
           </h2>
           <p className="mt-3 text-sm leading-relaxed text-white/75 sm:text-base">
-            ZotServis connects you with vetted local workers you can reach directly —
-            with reviews, verification, and transparency built in.
+            ZotServis helps people in Mauritius discover listed local service providers and contact
+            them directly by phone or WhatsApp, with clear profile information in one place.
           </p>
         </div>
 
@@ -156,7 +161,7 @@ export function TrustSection() {
                 <p className="mb-3 text-center text-xs leading-relaxed text-slate sm:text-sm">
                   {item.description}
                 </p>
-                <ul className="mt-auto space-y-1.5 border-t border-teal/10 pt-3">
+                {/* <ul className="mt-auto space-y-1.5 border-t border-teal/10 pt-3">
                   {item.highlights.map((highlight) => (
                     <li
                       key={highlight}
@@ -169,7 +174,7 @@ export function TrustSection() {
                       {highlight}
                     </li>
                   ))}
-                </ul>
+                </ul> */}
               </div>
             </li>
           ))}
@@ -179,7 +184,7 @@ export function TrustSection() {
           <div className="mb-5 text-center sm:mb-6">
             <h3 className="text-base font-bold text-white sm:text-lg">How it works for you</h3>
             <p className="mt-1 text-xs text-white/70 sm:text-sm">
-              Find the right person in minutes — free for customers.
+              Browse local service providers by category and area — free for public users.
             </p>
           </div>
           {/* Mobile — stacked steps, unchanged */}
@@ -225,7 +230,7 @@ export function TrustSection() {
               className="inline-flex items-center gap-2 rounded-full bg-gold px-5 py-2.5 text-sm font-semibold text-ocean transition-colors hover:bg-gold/90"
             >
               <Search className="h-4 w-4" aria-hidden />
-              Find a worker now
+              Find a Service Provider
             </Link>
           </div>
         </div>

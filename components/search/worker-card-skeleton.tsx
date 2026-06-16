@@ -48,7 +48,7 @@ export function WorkerCardSkeleton() {
 
 export function WorkerCardSkeletonList({ count = 4 }: { count?: number }) {
   return (
-    <div className="space-y-4" aria-busy="true" aria-label="Loading workers">
+    <div className="space-y-4" aria-busy="true" aria-label="Loading service providers">
       {Array.from({ length: count }).map((_, index) => (
         <WorkerCardSkeleton key={index} />
       ))}
