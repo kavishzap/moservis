@@ -3,6 +3,7 @@ import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { HashScrollHandler } from "@/components/hash-scroll-handler"
 import { HeroSection } from "@/components/home/hero-section"
+import { HeroImagePreload } from "@/components/home/hero-image-preload"
 import { CategoriesSection } from "@/components/home/categories-section"
 import { TrustSection } from "@/components/home/trust-section"
 import { CTASection } from "@/components/home/cta-section"
@@ -26,6 +27,7 @@ export default async function HomePage() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <HeroImagePreload />
       <HashScrollHandler />
       <Navbar />
       <main className="relative flex-1">

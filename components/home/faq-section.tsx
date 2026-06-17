@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import {
   Accordion,
   AccordionContent,
@@ -72,14 +71,18 @@ export function FAQSection() {
           </div>
 
           <div className="relative mx-auto w-full max-w-sm lg:mx-0 lg:max-w-none lg:pt-1">
-            <Image
-              src="/zotservismap.png"
-              alt="Map of Mauritius showing local service providers across the island"
-              width={640}
-              height={640}
-              className="h-auto w-full rounded-2xl"
-              sizes="(min-width: 1280px) 416px, (min-width: 1024px) 352px, 384px"
-            />
+            <picture>
+              <source srcSet="/zotservismap.webp" type="image/webp" />
+              <img
+                src="/zotservismap.png"
+                alt="Map of Mauritius showing local service providers across the island"
+                width={640}
+                height={640}
+                loading="lazy"
+                decoding="async"
+                className="h-auto w-full rounded-2xl"
+              />
+            </picture>
           </div>
         </div>
       </div>

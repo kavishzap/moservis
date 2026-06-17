@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import { MapPin } from "lucide-react"
 import { goldButtonClassName } from "@/lib/brand-buttons"
@@ -13,6 +12,7 @@ import { heroSearchSelectTriggerClassName } from "@/components/service-type-sele
 import { MAURITIUS_DISTRICTS } from "@/lib/search-options"
 import { ALL_DISTRICTS, buildSearchHref } from "@/lib/search-url"
 import { heroContainer } from "@/lib/site-layout"
+import { HeroBackgroundImage } from "@/components/home/hero-background-image"
 import { getServiceCategories, type ServiceCategory } from "@/services/categoryService"
 
 function HeroCopyCard({ className }: { className?: string }) {
@@ -196,23 +196,8 @@ export function HeroSection() {
     <section className="relative">
       <div className={`${heroContainer} relative pb-8 pt-1 sm:pb-10 sm:pt-1.5 md:pb-10`}>
         <div className="overflow-hidden rounded-[2.75rem] bg-card ring-1 ring-black/[0.06] sm:rounded-[3.5rem] lg:rounded-[4.5rem] xl:rounded-[5.5rem]">
-          <div className="relative min-h-[min(68dvh,36rem)] w-full sm:min-h-[min(72dvh,40rem)] md:min-h-[calc(100dvh-7.25rem)] md:max-h-[min(920px,calc(100dvh-5.5rem))]">
-            <Image
-              src="/zotservisportrait.png"
-              alt="Families and local workers together in Mauritius"
-              fill
-              priority
-              className="object-cover object-center md:hidden"
-              sizes="100vw"
-            />
-            <Image
-              src="/zotservislandscape.png"
-              alt="Families and local workers together in Mauritius"
-              fill
-              priority
-              className="hidden object-cover object-[center_28%] md:block"
-              sizes="(min-width: 768px) 92rem"
-            />
+          <div className="relative min-h-[min(68dvh,36rem)] w-full bg-ocean/10 sm:min-h-[min(72dvh,40rem)] md:min-h-[calc(100dvh-7.25rem)] md:max-h-[min(920px,calc(100dvh-5.5rem))]">
+            <HeroBackgroundImage alt="Families and local service providers together in Mauritius" />
             <div
               className="pointer-events-none absolute inset-0 bg-gradient-to-bl from-ocean/55 via-ocean/22 via-45% to-transparent"
               aria-hidden
