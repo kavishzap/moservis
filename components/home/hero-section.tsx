@@ -55,7 +55,7 @@ function HeroSearchBar({
   searchHref: string
 }) {
   return (
-    <div className="hero-search-shell mx-auto flex w-full max-w-[42rem] flex-col gap-3 rounded-2xl border-[3px] border-white bg-ocean p-4 sm:max-w-[44rem] sm:flex-row sm:items-center sm:gap-3 md:max-w-[min(100%,64rem)] md:p-4 lg:p-5">
+    <div className="hero-search-shell mx-auto flex w-full min-w-0 max-w-[42rem] flex-col gap-3 overflow-hidden rounded-2xl border-[3px] border-white bg-ocean p-4 sm:max-w-[44rem] md:max-w-[min(100%,64rem)] md:flex-row md:items-center md:gap-3 md:p-4 lg:p-5">
       <CategorySubcategoryFilters
         variant="hero"
         categories={categories}
@@ -66,10 +66,10 @@ function HeroSearchBar({
         onCategorySelect={onCategorySelect}
         onSubcategorySelect={onSubcategorySelect}
         loading={categoriesLoading}
-        className="md:min-w-0 md:flex-[2]"
+        className="min-w-0 md:min-w-0 md:flex-[2]"
       />
 
-      <div className="relative min-w-0 flex-1 md:max-w-[13rem] lg:max-w-[15rem]">
+      <div className="relative min-w-0 w-full md:max-w-[13rem] md:flex-1 lg:max-w-[15rem]">
         <MapPin
           className="pointer-events-none absolute top-1/2 left-3.5 z-10 h-4 w-4 -translate-y-1/2 text-white/80"
           aria-hidden
@@ -92,7 +92,7 @@ function HeroSearchBar({
       </div>
 
       <div
-        className="hidden h-12 w-px shrink-0 bg-white/35 sm:h-[3.25rem] sm:mx-2 sm:block lg:mx-3"
+        className="hidden h-12 w-px shrink-0 bg-white/35 md:mx-2 md:block md:h-[3.25rem] lg:mx-3"
         aria-hidden
       />
 
@@ -100,10 +100,10 @@ function HeroSearchBar({
         asChild
         className={cn(
           goldButtonClassName,
-          "h-12 w-full shrink-0 rounded-full text-sm sm:h-[3.25rem] sm:text-base md:min-w-[10.5rem] lg:min-w-[11.5rem]"
+          "h-12 w-full max-w-full shrink-0 rounded-full px-4 text-sm md:h-[3.25rem] md:w-auto md:min-w-[10.5rem] md:max-w-none md:px-6 md:text-base lg:min-w-[11.5rem]"
         )}
       >
-        <Link href={searchHref} className="w-full shrink-0 md:w-auto">
+        <Link href={searchHref} className="block w-full truncate text-center md:inline-flex md:w-auto">
           Find Service Providers
         </Link>
       </Button>

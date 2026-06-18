@@ -90,7 +90,7 @@ export function CategorySubcategoryFilters({
       return (
         <div
           className={cn(
-            "flex min-w-0 flex-1 flex-col gap-2.5 sm:flex-row sm:items-center",
+            "flex min-w-0 w-full flex-1 flex-col gap-2.5 md:flex-row md:items-center md:gap-3",
             className
           )}
         >
@@ -108,7 +108,7 @@ export function CategorySubcategoryFilters({
     return (
       <div
         className={cn(
-          "flex min-w-0 flex-1 flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-3",
+          "flex min-w-0 w-full flex-1 flex-col gap-2.5 md:flex-row md:items-center md:gap-3",
           className
         )}
       >
