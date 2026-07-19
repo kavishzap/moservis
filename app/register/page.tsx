@@ -27,18 +27,25 @@ import {
 } from "@/components/ui/dialog"
 import { MAURITIUS_DISTRICTS } from "@/lib/search-options"
 import { districtLabelForApi } from "@/lib/worker-dashboard"
-import {
-  DEFAULT_WORKER_PLAN,
-  WORKER_MONTHLY_RS,
-  WORKER_YEARLY_RS,
-  WORKER_YEARLY_SAVINGS_PCT,
-  WORKER_YEARLY_SAVINGS_RS,
-  type WorkerPlanId,
-} from "@/lib/worker-pricing"
 import { cn } from "@/lib/utils"
-import { PHONE_INPUT_PLACEHOLDER } from "@/lib/contact"
+import {
+  PHONE_INPUT_PLACEHOLDER,
+  SITE_CONTACT_EMAIL,
+  SITE_CONTACT_PHONE,
+  buildWhatsAppHref,
+  formatSitePhoneDisplay,
+} from "@/lib/contact"
 import { AUTH_PATHS } from "@/lib/auth-urls"
-import { CheckCircle2, Loader2, Users, Phone, TrendingUp, Shield, X } from "lucide-react"
+import {
+  CheckCircle2,
+  Loader2,
+  Users,
+  Phone,
+  TrendingUp,
+  Shield,
+  Sparkles,
+  ArrowUpRight,
+} from "lucide-react"
 import { SelectionPills } from "@/components/search/selection-pills"
 import { toast } from "@/lib/toast"
 import { normalizeEmail } from "@/lib/worker-application"
@@ -47,6 +54,23 @@ import {
   type ServiceCategory,
 } from "@/services/categoryService"
 import { registerWorker } from "@/services/workerService"
+
+const MAX_CATEGORIES = 3
+
+const PRO_UPGRADE_WHATSAPP_MESSAGE =
+  "Hello, I'm interested in upgrading to ZotServis Pro. Could you tell me more?"
+
+const freePlanPerks = [
+  "Public profile visible across Mauritius",
+  "Up to 3 service categories",
+  "Direct calls & WhatsApp from customers",
+]
+
+const proPlanPerks = [
+  "Priority placement in search results",
+  "More categories & portfolio space",
+  "Featured badge to stand out",
+]
 
 const benefits = [
   {
@@ -71,10 +95,6 @@ const benefits = [
       "Build a complete public profile with service details, photos, experience, and areas served",
   },
 ]
-
-function planToSubscription(plan: WorkerPlanId): "Monthly" | "Yearly" {
-  return plan === "monthly_100" ? "Monthly" : "Yearly"
-}
 
 function workerKindToType(kind: "individual" | "contractor"): "Individual" | "Company" {
   return kind === "individual" ? "Individual" : "Company"
@@ -146,7 +166,6 @@ export default function RegisterPage() {
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [district, setDistrict] = useState("")
   const [workerKind, setWorkerKind] = useState<"individual" | "contractor">("individual")
-  const [plan, setPlan] = useState<WorkerPlanId>(DEFAULT_WORKER_PLAN)
   const [successOpen, setSuccessOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
@@ -169,6 +188,10 @@ export default function RegisterPage() {
         const subIds = new Set(category?.subcategories.map((s) => s.id) ?? [])
         setSelectedSubcategoryIds((subs) => subs.filter((id) => !subIds.has(id)))
         return prev.filter((id) => id !== categoryId)
+      }
+      if (prev.length >= MAX_CATEGORIES) {
+        toast.error(`You can select up to ${MAX_CATEGORIES} categories.`)
+        return prev
       }
       return [...prev, categoryId]
     })
@@ -237,6 +260,11 @@ export default function RegisterPage() {
     }
     if (selectedCategoryIds.length === 0) {
       setCategoryError(true)
+      return
+    }
+    if (selectedCategoryIds.length > MAX_CATEGORIES) {
+      setFormError(`You can select up to ${MAX_CATEGORIES} categories.`)
+      toast.error(`You can select up to ${MAX_CATEGORIES} categories.`)
       return
     }
     const subcategoriesRequired = categories
@@ -311,7 +339,7 @@ export default function RegisterPage() {
         district: districtLabelForApi(district),
         areas_served: areasServedRaw || null,
         about: bio,
-        subscription_plan: planToSubscription(plan),
+        subscription_plan: null,
         terms_accepted: true,
         category_ids: selectedCategoryIds,
         subcategory_ids: selectedSubcategoryIds,
@@ -325,7 +353,6 @@ export default function RegisterPage() {
       setSubcategoryError(false)
       setDistrict("")
       setWorkerKind("individual")
-      setPlan(DEFAULT_WORKER_PLAN)
       setAgreedToTerms(false)
     } catch (err) {
       const raw =
@@ -538,7 +565,11 @@ export default function RegisterPage() {
                             Categories <RequiredStar />
                           </Label>
                           <p className="text-xs text-muted-foreground">
-                            Select the service categories you work in.
+                            Select up to {MAX_CATEGORIES} service categories you work in
+                            {selectedCategoryIds.length > 0
+                              ? ` (${selectedCategoryIds.length}/${MAX_CATEGORIES} selected)`
+                              : ""}
+                            .
                           </p>
                           {categoriesLoading ? (
                             <p className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -682,75 +713,96 @@ export default function RegisterPage() {
                     </RegisterFormSection>
 
                     <RegisterFormSection
-                      title={
-                        <>
-                          Subscription plan <RequiredStar />
-                        </>
-                      }
-                      description="Choose the plan for keeping your profile visible after your free period ends."
+                      title="Your plan"
+                      description="Start free. Upgrade to Pro later if you want more visibility."
                       headingId="subscription-plan-heading"
                     >
-                      <RadioGroup
-                        value={plan}
-                        onValueChange={(v) => setPlan(v as WorkerPlanId)}
+                      <div
                         className="grid gap-3 sm:grid-cols-2 sm:items-stretch"
                         aria-labelledby="subscription-plan-heading"
                       >
-                        <label
-                          htmlFor="plan-monthly"
-                          className={cn(
-                            "flex h-full min-h-[7.5rem] cursor-pointer flex-col rounded-2xl border p-4 transition-colors sm:min-h-0",
-                            plan === "monthly_100"
-                              ? "border-teal bg-teal/5 ring-2 ring-teal/20"
-                              : "border-border bg-background hover:bg-muted/40"
-                          )}
-                        >
-                          <div className="flex flex-1 items-start gap-3">
-                            <RadioGroupItem value="monthly_100" id="plan-monthly" className="mt-0.5" />
-                            <div className="min-w-0 flex-1 space-y-1">
-                              <span className="text-sm font-semibold text-foreground">Monthly</span>
-                              <p className="text-2xl font-bold tabular-nums text-foreground">
-                                Rs {WORKER_MONTHLY_RS}
-                                <span className="text-base font-semibold text-muted-foreground">
-                                  /month
-                                </span>
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                Flexible monthly plan. Cancellation affects future billing and profile
-                                visibility after the paid period.
-                              </p>
-                            </div>
+                        <div className="flex h-full flex-col rounded-2xl border border-teal bg-teal/5 p-4 ring-2 ring-teal/20">
+                          <div className="mb-3 flex items-center justify-between gap-2">
+                            <p className="text-sm font-semibold text-foreground">Free</p>
+                            <span className="rounded-full bg-teal px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide text-white">
+                              Included
+                            </span>
                           </div>
-                        </label>
-                        <label
-                          htmlFor="plan-yearly"
-                          className={cn(
-                            "flex h-full min-h-[7.5rem] cursor-pointer flex-col rounded-2xl border p-4 transition-colors sm:min-h-0",
-                            plan === "yearly_1000"
-                              ? "border-teal bg-teal/5 ring-2 ring-teal/20"
-                              : "border-border bg-background hover:bg-muted/40"
-                          )}
-                        >
-                          <div className="flex flex-1 items-start gap-3">
-                            <RadioGroupItem value="yearly_1000" id="plan-yearly" className="mt-0.5" />
-                            <div className="min-w-0 flex-1 space-y-1">
-                              <span className="inline-flex flex-wrap items-center gap-2 text-sm font-semibold text-foreground">
-                                Yearly
-                                <span className="rounded-full bg-primary px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide text-primary-foreground">
-                                  Save {WORKER_YEARLY_SAVINGS_PCT}%
-                                </span>
-                              </span>
-                              <p className="text-2xl font-bold tabular-nums text-foreground">
-                                Rs {WORKER_YEARLY_RS.toLocaleString("en-MU")}
-                                <span className="text-base font-semibold text-muted-foreground">/year</span>
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                Saves Rs {WORKER_YEARLY_SAVINGS_RS} vs 12 monthly payments.
-                              </p>
-                            </div>
+                          <p className="text-2xl font-bold tabular-nums text-foreground">
+                            Rs 0
+                            <span className="text-base font-semibold text-muted-foreground">
+                              /forever
+                            </span>
+                          </p>
+                          <ul className="mt-3 space-y-2">
+                            {freePlanPerks.map((perk) => (
+                              <li
+                                key={perk}
+                                className="flex gap-2 text-xs leading-snug text-muted-foreground"
+                              >
+                                <CheckCircle2
+                                  className="mt-0.5 h-3.5 w-3.5 shrink-0 text-teal"
+                                  aria-hidden
+                                />
+                                <span>{perk}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div className="flex h-full flex-col rounded-2xl border border-border bg-background p-4">
+                          <div className="mb-3 flex items-center justify-between gap-2">
+                            <p className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                              <Sparkles className="h-3.5 w-3.5 text-ocean" aria-hidden />
+                              Pro
+                            </p>
+                            <span className="rounded-full bg-muted px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide text-muted-foreground">
+                              Optional
+                            </span>
                           </div>
-                        </label>
-                      </RadioGroup>
+                          <p className="text-sm font-medium text-foreground">
+                            Upgrade for more advantage
+                          </p>
+                          <ul className="mt-3 space-y-2">
+                            {proPlanPerks.map((perk) => (
+                              <li
+                                key={perk}
+                                className="flex gap-2 text-xs leading-snug text-muted-foreground"
+                              >
+                                <Sparkles
+                                  className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ocean"
+                                  aria-hidden
+                                />
+                                <span>{perk}</span>
+                              </li>
+                            ))}
+                          </ul>
+                          <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+                            Want Pro? Contact an admin after you register — we’ll set it up for you.
+                          </p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <a
+                              href={buildWhatsAppHref(
+                                SITE_CONTACT_PHONE,
+                                PRO_UPGRADE_WHATSAPP_MESSAGE,
+                              )}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 rounded-lg border border-border bg-muted/40 px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                            >
+                              WhatsApp admin
+                              <ArrowUpRight className="h-3 w-3" aria-hidden />
+                            </a>
+                            <a
+                              href={`mailto:${SITE_CONTACT_EMAIL}?subject=${encodeURIComponent("ZotServis Pro upgrade")}&body=${encodeURIComponent(PRO_UPGRADE_WHATSAPP_MESSAGE)}`}
+                              className="inline-flex items-center gap-1 rounded-lg border border-border bg-muted/40 px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                            >
+                              Email admin
+                              <ArrowUpRight className="h-3 w-3" aria-hidden />
+                            </a>
+                          </div>
+                        </div>
+                      </div>
                     </RegisterFormSection>
 
                     <RegisterFormSection title="About you">
@@ -841,8 +893,7 @@ export default function RegisterPage() {
                   </h3>
                   <p className="mb-6 text-sm text-muted-foreground">
                     List your services so people across Mauritius can find and contact you directly.
-                    Service providers pay a simple subscription to keep their profile visible after the
-                    free period.
+                    Joining as a service provider is free.
                   </p>
                   <div className="space-y-6">
                     {benefits.map((benefit) => (
@@ -858,31 +909,54 @@ export default function RegisterPage() {
                     ))}
                   </div>
 
-                  <div className="mt-8 rounded-xl border border-border bg-muted/40 p-4">
-                    <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Pricing
-                    </p>
-                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:gap-6">
-                      <div>
-                        <p className="text-2xl font-bold tabular-nums text-foreground">
-                          Rs {WORKER_MONTHLY_RS}
-                          <span className="text-base font-semibold text-muted-foreground">/month</span>
-                        </p>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-2xl font-bold tabular-nums text-foreground">
-                          Rs {WORKER_YEARLY_RS.toLocaleString("en-MU")}
-                          <span className="text-base font-semibold text-muted-foreground">/year</span>
-                        </p>
-                        <span className="inline-flex rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-primary-foreground">
-                          Save {WORKER_YEARLY_SAVINGS_PCT}%
+                  <div className="mt-8 space-y-3">
+                    <div className="rounded-xl border border-teal/30 bg-teal/5 p-4">
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Free Subscription
+                      </p>
+                      <p className="text-2xl font-bold tabular-nums text-foreground">
+                        Rs 0
+                        <span className="text-base font-semibold text-muted-foreground">
+                          /forever
                         </span>
-                      </div>
+                      </p>
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Register free and stay visible — no card required.
+                      </p>
                     </div>
-                    <p className="mt-3 text-xs text-muted-foreground">
-                      Yearly billing saves Rs {WORKER_YEARLY_SAVINGS_RS} compared to 12 monthly payments (
-                      {WORKER_YEARLY_SAVINGS_PCT}% off).
-                    </p>
+
+                    <div className="rounded-xl border border-border bg-muted/30 p-4">
+                      <p className="mb-1 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        <Sparkles className="h-3.5 w-3.5 text-ocean" aria-hidden />
+                        Upgrade to Pro
+                      </p>
+                      <p className="text-sm leading-relaxed text-foreground">
+                        Get priority in search, a featured badge, and more room to showcase your
+                        services.
+                      </p>
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Contact an admin to upgrade —{" "}
+                        <a
+                          href={buildWhatsAppHref(
+                            SITE_CONTACT_PHONE,
+                            PRO_UPGRADE_WHATSAPP_MESSAGE,
+                          )}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-teal underline underline-offset-2"
+                        >
+                          WhatsApp {formatSitePhoneDisplay(SITE_CONTACT_PHONE)}
+                        </a>{" "}
+                        or{" "}
+                        <a
+                          href={`mailto:${SITE_CONTACT_EMAIL}?subject=${encodeURIComponent("ZotServis Pro upgrade")}`}
+                          className="font-medium text-teal underline underline-offset-2"
+                        >
+                          {SITE_CONTACT_EMAIL}
+                        </a>
+                        .
+                      </p>
+                    </div>
                   </div>
                 </div>
               </aside>
