@@ -28,7 +28,7 @@ const faqs = [
   {
     question: "Is ZotServis free?",
     answer:
-      "Yes. ZotServis is free for public users to search and contact service providers. Service providers pay a simple subscription to keep their profile visible after the free period: Rs 100 per month, or Rs 1,000 per year (about 17% less than paying monthly).",
+      "Yes. ZotServis is free for public users to search and contact service providers. Service providers can also join and keep their profile visible for free. Want more visibility? Upgrade to Pro for advantages like priority in search and a featured badge — contact an admin to set it up.",
   },
   {
     question: "Are service provider profiles reviewed?",
